@@ -1,0 +1,27 @@
+export const userTypeDefs = `
+
+    enum Role{
+        MANAGER
+        CARE_WORKER
+    }
+
+    type User{
+        id: Int
+        authId: String
+        email: String
+        name: String
+        role: Role
+        organizationId: Int
+        createdAt: String
+        shifts: [Shift]
+    }
+
+    type Query{
+        getUserInformation(id: Int!): User
+    }
+
+    type Mutation{
+        addNewUser(authId: String!, email: String!, name: String!, role: String!, organizationId: Int!): User
+    }
+    
+`
