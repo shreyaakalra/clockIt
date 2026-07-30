@@ -13,7 +13,7 @@ export const organizationTypeDefs = `
     }
 
     type Mutation{
-        createOrganization(name: String!, inviteCode: String!): Organization
+        createOrganization(name: String!): Organization
     }
 
 `

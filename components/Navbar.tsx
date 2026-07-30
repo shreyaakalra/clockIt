@@ -17,7 +17,7 @@ export default function Navbar(){
                 <button
                     className="border border-brand-heading h-10 w-24 md:mr-8 rounded font-inter font-semibold bg-brand-primary text-amber-50 hover:bg-brand-bg hover:text-brand-primary hover:border-brand-primary "
                 >
-                    Sign in
+                    Sign In
                 </button>
                 </a>
             </header>
