@@ -1,3 +1,4 @@
+import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
 import { auth0 } from "@/lib/auth0";
 import prisma from "@/lib/prisma";
@@ -12,10 +13,11 @@ export default async function Home() {
     return (
       <div className="bg-brand-bg text-brand-text">
       <Navbar />
+      <Hero />
 
       </div>
     );
-    
+
   }
 
   const sub = session.user.sub;
