@@ -10,6 +10,12 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-jost: var(--font-jost);
+  --font-inter: var(--font-inter);
+  --color-brand-bg: #F5F8FA;
+  --color-brand-text: #0F2E2C;
+  --color-brand-primary: #00AFAA;
+  --color-brand-heading: #034144;
 }
 
 body {
