@@ -21,7 +21,7 @@ export const userTypeDefs = `
     }
 
     type Mutation{
-        addNewUser(authId: String!, email: String!, name: String!, role: String!, organizationId: Int!): User
+        addNewUser(authId: String!, email: String!, name: String!, role: Role, organizationId: Int!): User
     }
     
 `

@@ -1,4 +1,4 @@
-export const shiftTypeDef = `
+export const shiftTypeDefs = `
     
     type Shift{
         id: Int
@@ -18,7 +18,9 @@ export const shiftTypeDef = `
         showShiftDetails(userId: Int!): Shift
     }
 
-    type Mitigation{
+    type Mutation{
         clockIn(userId: Int!, perimeterId: Int!, clockInLatitude: Float!, clockInLongitude: Float!, clockInNote: String): Shift
+
+        clockOut(shiftId: Int!, clockOutLatitude: Float!, clockOutLongitude: Float!, clockOutNote: String): Shift
     }
 `

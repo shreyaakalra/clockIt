@@ -9,7 +9,7 @@ export const organizationTypeDefs = `
     }
 
     type Query{
-        organizationByInviteCode(inviteCode: String!): Organisation
+        organizationByInviteCode(inviteCode: String!): Organization
     }
 
     type Mutation{
