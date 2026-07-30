@@ -1,7 +1,7 @@
 import { Button } from 'antd'
 import Image from 'next/image'
 
-export default function Hero(){
+export default function Hero({isLoggedIn} : {isLoggedIn: boolean}){
     return(
         <section className="flex flex-col md:flex-row mt-12 p-12 gap-12 items-center justify-between max-w-7xl mx-auto">
             <div className="flex flex-col md:w-[38%] shrink-0">
@@ -16,18 +16,18 @@ export default function Hero(){
                         Care workers clock in the moment they arrive on site. Managers see who&apos;s on shift, where, and for how long.
                     </p>
                     <div className="flex items-center gap-4">
-                        <a href="/auth/login">
-                            <Button
-                                type="primary"
-                                size="large"
-                                style={{ background: "#00AFAA", borderColor: "#00AFAA", fontFamily: "var(--font-inter)", fontWeight: 500 }}
-                            >
-                                Get started
-                            </Button>
-                        </a>
-                        <a href="/auth/login" className="text-sm font-medium underline underline-offset-4 text-brand-primary">
+                        <a href={isLoggedIn ? "/launch" : "/auth/login"}>
+                        <Button
+                            type="primary"
+                            size="large"
+                            style={{ background: "#00AFAA", borderColor: "#00AFAA", fontFamily: "var(--font-inter)", fontWeight: 500 }}
+                        >
+                            {isLoggedIn ? "Go to dashboard" : "Get started"}
+                        </Button>
+                    </a>
+                        {!isLoggedIn && <a href="/auth/login" className="text-sm font-medium underline underline-offset-4 text-brand-primary">
                             I already have an account
-                        </a>
+                        </a>}
                     </div>
                 </div>
                 <div>
