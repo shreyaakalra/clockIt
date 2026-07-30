@@ -1,46 +1,10 @@
 import { createSchema, createYoga } from 'graphql-yoga';
-import prisma  from '@/lib/prisma'
+import { typeDefs } from '@/graphql/typeDefs';
+import { resolvers } from '@/graphql/resolvers';
 
 const schema = createSchema({
-  typeDefs: `
-    type Organization {
-      id: Int,
-      name: String,
-      inviteCode: String
-    }
-    
-    type Query{
-        organizationByInviteCode(inviteCode: String!): Organization
-    }
-
-    type Mutation{
-        createOrganization(name: String!, inviteCode: String!): Organization
-    }
-  `,
-  
-  resolvers: {
-    Query: {
-      organizationByInviteCode: async(_parent, args) => {
-        return prisma.organization.findUnique({
-            where: {
-                inviteCode: args.inviteCode
-            }
-        })
-      },
-    },
-
-    Mutation: {
-        createOrganization: async(_parent, args) => {
-            return prisma.organization.create({
-                data: {
-                    name: args.name,
-                    inviteCode: args.inviteCode
-                }
-            });
-        }
-    }
-
-  },
+  typeDefs,
+  resolvers
 });
 
 const { handleRequest } = createYoga({
