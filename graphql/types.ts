@@ -55,3 +55,7 @@ export type AddNewUserArgs = {
 export type GetUserInformationByEmailArgs = {
     email: string
 }
+
+export type OrganizationByIdArgs = {
+    id: number
+}

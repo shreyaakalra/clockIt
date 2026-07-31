@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"
-import { CreateOrganizationArgs, OrganizationByInviteCodeArgs } from "../types"
+import { CreateOrganizationArgs, OrganizationByIdArgs, OrganizationByInviteCodeArgs } from "../types"
 import { customAlphabet } from "nanoid";
 
 const generateInviteCode = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789", 8);
@@ -11,6 +11,14 @@ export const organizationResolver = {
             return prisma.organization.findUnique({
                 where: {
                     inviteCode: args.inviteCode
+                }
+            })
+        },
+        
+        organizationById: async(_parent: unknown, args: OrganizationByIdArgs) => {
+            return prisma.organization.findUnique({
+                where: {
+                    id: args.id
                 }
             })
         }

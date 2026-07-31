@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 const mockInviteCode = "RIVER-7F2K";
 
-type perimeterType = {
+type PerimeterType = {
     id: number,
     name: string,
     lat: number,
@@ -22,7 +22,6 @@ type PerimeterFormValues = {
     longitude: number;
 };
 
-const mockPerimeters: perimeterType[] = [];
 
 function ReadOnlyGeoField({
   label,
@@ -47,6 +46,10 @@ export default function ManagerSettingsPage(){
   const router = useRouter();
 
   const [copied, setCopied] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+  const [perimeters, setPerimeters] = useState<PerimeterType[]>([])
+
+  
 
   const handleCopy = () => {
     navigator.clipboard.writeText(mockInviteCode);
@@ -66,7 +69,6 @@ export default function ManagerSettingsPage(){
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
             });
-            // clear any validation errors now that we have a value
             form.validateFields(["latitude", "longitude"]).catch(() => {});
         },
         (error) => {
@@ -197,7 +199,7 @@ export default function ManagerSettingsPage(){
             Clock-in perimeters
           </h2>
 
-          <div className="flex flex-col gap-3 mb-6">
+          {/*<div className="flex flex-col gap-3 mb-6">
             {mockPerimeters.map((p) => (
               <div
                 key={p.id}
@@ -214,7 +216,7 @@ export default function ManagerSettingsPage(){
                 </button>
               </div>
             ))}
-          </div>
+          </div>*/}
 
           <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
             <Form.Item>

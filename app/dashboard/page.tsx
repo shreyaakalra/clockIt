@@ -1,6 +1,8 @@
-import { Button, Table, Tag } from "antd";
+"use client"
 
-const mockShifts = [];
+import { useUser } from "@auth0/nextjs-auth0";
+import { Button, Table, Tag } from "antd";
+import { useEffect, useState } from "react";
 
 const columns = [
   { title: "Date", dataIndex: "date", key: "date" },
@@ -12,7 +14,196 @@ const columns = [
 
 export default function CareWorkerDashboard() {
   
-  const isClockedIn = false;
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const {user} = useUser();
+
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [note, setNote] = useState("");
+  const [error, setError] = useState("");
+  const [errorExists, setErrorExists] = useState(false);
+  const [shifts, setShifts] = useState([]);
+
+  const mockShifts = shifts;
+
+  const getGeoLocation = (): Promise<{ lat: number; lng: number }> => {
+    return new Promise((resolve, reject) => {
+      if(!navigator.geolocation){
+        console.log('Cannot GeoLocate on this browser.')
+        reject("No geolocation");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            resolve({ lat: position.coords.latitude, lng: position.coords.longitude }); 
+          },
+          (error) => {
+              console.log("Couldn't get Location", error.message);
+              reject(error);
+          }
+      )
+    });
+  }
+
+  const addShift = async() => {
+
+    if(!user) return;
+
+    const userResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          query: `
+            query($email: String!){
+              getUserInformationByEmail(email: $email){
+                id
+                name
+                role
+                organizationId
+                perimeterId
+                shifts {
+                  id
+                  clockInTime
+                  clockOutTime
+                  clockInNote
+                }
+              }
+            }
+          `,
+          variables: {email: user.email}
+        })
+      });
+
+      const userResult = await userResponse.json();
+
+      if(userResult.errors){
+        console.log(userResult.errors);
+        return;
+      }
+
+    const userData = userResult.data.getUserInformationByEmail;
+
+    const shiftResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type" : "application/json"},
+        body: JSON.stringify({
+          query: `
+            mutation($userId: Int!, $perimeterId: Int!, $clockInLatitude: Float!, $clockInLongitude: Float!, $clockInNote: String!){
+              clockIn(userId: $userId, perimeterId: $perimeterId, clockInLatitude: $clockInLatitude, clockInLongitude: $clockInLongitude, clockInNote: $clockInNote){
+                clockInTime
+              }
+            }
+          `,
+          variables: {
+            userId: userData.id,
+            perimeterId: userData.perimeterId,
+            clockInLatitude: latitude,
+            clockInLongitude: longitude,
+            clockInNote: note
+          }
+        })
+      });
+
+      const shiftResult = await shiftResponse.json();
+      setIsClockedIn(true);
+
+      const formattedShifts = userData.shifts.map((shift, index) => ({
+        key: shift.id || index, 
+        date: new Date(Number(shift.clockInTime)).toLocaleDateString(),
+        clockIn: new Date(Number(shift.clockInTime)).toLocaleTimeString(),
+        clockOut: shift.clockOutTime ? new Date(Number(shift.clockOutTime)).toLocaleTimeString() : "-",
+        duration: "...", 
+        note: shift.clockInNote
+      }));
+
+      setShifts(formattedShifts);
+
+  }
+
+  useEffect(() => {
+
+    async function checkingOnSite(){
+
+      if(!user) return;
+      
+      const userResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          query: `
+            query($email: String!){
+              getUserInformationByEmail(email: $email){
+                id
+                name
+                role
+                organizationId
+                perimeterId
+                shifts {
+                  id
+                  clockInTime
+                  clockOutTime
+                  clockInNote
+                }
+              }
+            }
+          `,
+          variables: {email: user.email}
+        })
+      });
+
+      const userResult = await userResponse.json();
+
+      if(userResult.errors){
+        console.log(userResult.errors);
+        return;
+      }
+
+      const userData = userResult.data.getUserInformationByEmail;
+
+      const coords = await getGeoLocation();
+
+      const shiftResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type" : "application/json"},
+        body: JSON.stringify({
+          query: `
+            mutation($userId: Int!, $perimeterId: Int!, $clockInLatitude: Float!, $clockInLongitude: Float!, $clockInNote: String!){
+              checkPerimeter(userId: $userId, perimeterId: $perimeterId, clockInLatitude: $clockInLatitude, clockInLongitude: $clockInLongitude, clockInNote: $clockInNote)
+            }
+          `,
+          variables: {
+            userId: userData.id,
+            perimeterId: userData.perimeterId,
+            clockInLatitude: coords.lat,
+            clockInLongitude: coords.lng,
+            clockInNote: note
+          }
+        })
+      });
+
+      const shiftResult = await shiftResponse.json();
+
+      if(shiftResult.errors){
+        console.log(shiftResult.errors);
+        setError(shiftResult.errors[0]?.message);
+        setErrorExists(true);
+        return;
+      }
+
+      setError("");
+      setErrorExists(false);
+
+      const shiftData = shiftResult.data.clockIn;
+
+      return true;
+    }
+
+    checkingOnSite();
+
+  }, [user])
 
   return (
     <div className="min-h-screen bg-brand-bg">
@@ -51,14 +242,16 @@ export default function CareWorkerDashboard() {
             </div>
             <Tag
               className="font-inter"
-              color={isClockedIn ? "success" : "default"}
+              color={!errorExists ? "success" : "default"}
             >
-              {isClockedIn ? "Within perimeter" : "Not on site"}
+              {!errorExists ? "Within perimeter" : "Not on site"}
             </Tag>
           </div>
 
           <textarea
             placeholder={isClockedIn ? "Add a note before you clock out " : "Add a note before you clock in "}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
             className="border-2 h-20 w-100 mb-5 items-center p-5 rounded-2xl font-inter "
           />
 
@@ -67,7 +260,9 @@ export default function CareWorkerDashboard() {
             size="large"
             block
             danger={isClockedIn}
-            className={`font-inter font-medium ${!isClockedIn ? "bg-brand-primary border-brand-primary" : ""}`}
+            className={`font-inter font-medium ${!isClockedIn ? "bg-brand-primary border-brand-primary" : ""} `}
+            disabled={errorExists}    
+            onClick={addShift}      
           >
             {isClockedIn ? "Clock out" : "Clock in"}
           </Button>

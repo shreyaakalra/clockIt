@@ -12,6 +12,7 @@ export const userTypeDefs = `
         name: String
         role: Role
         organizationId: Int
+        perimeterId: Int
         createdAt: String
         shifts: [Shift]
     }

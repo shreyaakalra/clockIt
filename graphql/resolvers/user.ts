@@ -34,13 +34,26 @@ export const userResolver = {
                 throw new GraphQLError("User already exists.")
             }
 
+            let perimeterId: number | undefined;
+
+            if(args.role === "CARE_WORKER"){
+                const perimeter = await prisma.perimeter.findFirst({
+                    where: {
+                        orgId: args.organizationId
+                    }
+                });
+
+                perimeterId = perimeter?.id;
+            }
+
             return await prisma.user.create({
                 data: {
                     authId: args.authId,
                     email: args.email,
                     name: args.name,
                     organizationId: args.organizationId,
-                    role: args.role
+                    role: args.role,
+                    perimeterId
                 }
             })
         }
