@@ -18,10 +18,11 @@ export const userTypeDefs = `
 
     type Query{
         getUserInformation(id: Int!): User
+        getUserInformationByEmail(email: String!): User
     }
 
     type Mutation{
-        addNewUser(authId: String!, email: String!, name: String!, role: Role, organizationId: Int!): User
+        addNewUser(authId: String!, email: String!, name: String!, role: Role!, organizationId: Int!): User
     }
     
 `

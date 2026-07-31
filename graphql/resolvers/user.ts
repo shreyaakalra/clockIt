@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { AddNewUserArgs, GetUserInformationArgs } from "../types";
+import { AddNewUserArgs, GetUserInformationArgs, GetUserInformationByEmailArgs } from "../types";
 import { GraphQLError } from "graphql";
 
 
@@ -10,6 +10,13 @@ export const userResolver = {
             return await prisma.user.findUnique({
                 where: {
                     id: args.id
+                }
+            })
+        },
+        getUserInformationByEmail: async(_parent: unknown, args: GetUserInformationByEmailArgs) => {
+            return await prisma.user.findUnique({
+                where: {
+                    email: args.email
                 }
             })
         }

@@ -1,5 +1,4 @@
-import { Role } from "@/app/generated/prisma/enums"
-
+import { Role } from "@/generated/prisma/enums"
 
 export type OrganizationByInviteCodeArgs = {
     inviteCode: string
@@ -51,4 +50,8 @@ export type AddNewUserArgs = {
     name: string,
     role: Role, 
     organizationId: number
+}
+
+export type GetUserInformationByEmailArgs = {
+    email: string
 }

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "antd";
+import { Button, Form, Input } from "antd";
+import { useUser } from "@auth0/nextjs-auth0";
+import { useRouter } from "next/navigation";
 
 const mockInviteCode = "RIVER-7F2K";
 
@@ -13,25 +15,43 @@ type perimeterType = {
     radius: number
 }
 
+type PerimeterFormValues = {
+    name: string;
+    radius: string;
+    latitude: number;
+    longitude: number;
+};
+
 const mockPerimeters: perimeterType[] = [];
 
-export default function ManagerSettingsPage() {
+function ReadOnlyGeoField({
+  label,
+  value,
+}: {
+  label: string;
+  value?: number;
+}) {
+  return (
+    <div className="flex-1 rounded-lg border border-brand-border bg-brand-pale/40 px-3 py-2">
+      <p className="text-[10px] uppercase tracking-wide text-brand-muted font-inter">
+        {label}
+      </p>
+      <p className="text-sm font-inter text-brand-text">{value ?? "—"}</p>
+    </div>
+  );
+}
+
+export default function ManagerSettingsPage(){
+  const [form] = Form.useForm<PerimeterFormValues>();
+  const {user} = useUser();
+  const router = useRouter();
+
   const [copied, setCopied] = useState(false);
-  const [name, setName] = useState("");
-  const [radius, setRadius] = useState("");
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(mockInviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  };
-
-  const handleAddPerimeter = (e: React.FormEvent) => {
-    e.preventDefault();
-    // wire to addPerimeter mutation here
-    console.log({ name, radius });
   };
 
   const getGeoLocation = () => {
@@ -42,13 +62,83 @@ export default function ManagerSettingsPage() {
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            setLatitude(position.coords.latitude);
-            setLongitude(position.coords.longitude);
+            form.setFieldsValue({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            });
+            // clear any validation errors now that we have a value
+            form.validateFields(["latitude", "longitude"]).catch(() => {});
         },
         (error) => {
             console.log("Couldn't get Location", error.message);
         }
     )
+  }
+
+  const onFinish = async(values: PerimeterFormValues) => {
+
+    if(!user) return;
+
+    const userResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            query: `
+                query($email: String!){
+                    getUserInformationByEmail(email: $email){
+                        organizationId
+                    }
+                }
+            `,
+            variables: {email: user.email}
+        })
+    });
+
+    const userResult = await userResponse.json();
+
+    if(userResult.errors){
+        console.log(userResult.errors);
+        return;
+    }
+
+    const userDetails = userResult.data.getUserInformationByEmail;
+
+    if(!userDetails){
+        console.log("couldn't find your user record.")
+        return;
+    }
+
+    const perimeterResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            query: `
+                mutation($name: String!, $latitude: Float!, $longitude: Float!, $radius: Float!, $orgId: Int!){
+                    addPerimeter(name: $name, latitude: $latitude, longitude: $longitude, radius: $radius, orgId: $orgId){
+                        id
+                    }
+                }
+            `,
+            variables: {
+                name: values.name,
+                latitude: values.latitude,
+                longitude: values.longitude,
+                radius: Number(values.radius),
+                orgId: userDetails.organizationId
+            }
+        })
+    })
+
+    const perimeterResult = await perimeterResponse.json();
+
+    if(perimeterResult.errors){
+        console.log(perimeterResult.errors);
+        return;
+    }
+    
+    form.resetFields();
+
+    router.push('/manager/dashboard')
   }
 
   return (
@@ -102,7 +192,6 @@ export default function ManagerSettingsPage() {
           </div>
         </div>
 
-        {/* Perimeters */}
         <div className="bg-white rounded-2xl border border-brand-border p-6">
           <h2 className="font-jost text-base font-semibold text-brand-heading mb-5">
             Clock-in perimeters
@@ -127,46 +216,73 @@ export default function ManagerSettingsPage() {
             ))}
           </div>
 
-          <form onSubmit={handleAddPerimeter} className="border-t border-brand-border pt-6">
+          <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+            <Form.Item>
+                <p className="font-inter font-medium text-brand-heading text-sm mb-4">
+                    Add a new perimeter
+                </p>
+            </Form.Item>
 
-            <p className="font-inter font-medium text-brand-heading text-sm mb-4">
-              Add a new perimeter
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-brand-muted font-inter">Name</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Main entrance"
-                  className="rounded-lg border border-brand-border px-3 py-2 text-sm font-inter text-brand-text placeholder:text-brand-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+            <Form.Item
+                label={
+                    <span className="text-xs text-brand-muted font-inter">
+                        Name
+                    </span>
+                }
+                name="name"
+                rules={[{
+                required: true,
+                message: "Please enter the name of the perimeter"
+                }]}
+            >
+                <Input
+                    size="large"
+                    placeholder="e.g. Main entrance"
+                    className="rounded-lg border border-brand-border px-3 py-2 text-sm font-inter text-brand-text placeholder:text-brand-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
                 />
-              </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-brand-muted font-inter">Radius (km)</label>
-                <input
-                  value={radius}
-                  onChange={(e) => setRadius(e.target.value)}
-                  placeholder="e.g. 0.5"
-                  className="rounded-lg border border-brand-border px-3 py-2 text-sm font-inter text-brand-text placeholder:text-brand-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+            </Form.Item>
+
+            <Form.Item
+                label={
+                    <span className="text-xs text-brand-muted font-inter">
+                        Radius
+                    </span>
+                }
+                name="radius"
+                rules={[{
+                required: true,
+                message: "Please enter the radius of the perimeter"
+                }]}
+            >
+                <Input
+                    size="large"
+                    placeholder="e.g. 0.5"
+                    className="rounded-lg border border-brand-border px-3 py-2 text-sm font-inter text-brand-text placeholder:text-brand-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
                 />
-              </div>
-            </div>
 
-            <div className="flex flex-col gap-1 mb-4">
+            </Form.Item>
+
+            <Form.Item>
+                <div className="flex flex-col gap-1 mb-4">
               <label className="text-xs text-brand-muted font-inter">Location</label>
               <div className="flex items-center gap-3">
-                <div className="flex-1 rounded-lg border border-brand-border bg-brand-pale/40 px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-wide text-brand-muted font-inter">Latitude</p>
-                  <p className="text-sm font-inter text-brand-text">{latitude}</p>
-                </div>
-                <div className="flex-1 rounded-lg border border-brand-border bg-brand-pale/40 px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-wide text-brand-muted font-inter">Longitude</p>
-                  <p className="text-sm font-inter text-brand-text">{longitude}</p>
-                </div>
+                <Form.Item
+                    name="latitude"
+                    noStyle
+                    rules={[{ required: true, message: "Please set the location" }]}
+                >
+                    <ReadOnlyGeoField label="Latitude" />
+                </Form.Item>
+
+                <Form.Item
+                    name="longitude"
+                    noStyle
+                    rules={[{ required: true, message: "Please set the location" }]}
+                >
+                    <ReadOnlyGeoField label="Longitude" />
+                </Form.Item>
+
                 <button
                   type="button"
                   onClick={getGeoLocation}
@@ -176,15 +292,19 @@ export default function ManagerSettingsPage() {
                 </button>
               </div>
             </div>
+            </Form.Item>
 
             <Button
               htmlType="submit"
               type="primary"
-              className="bg-brand-primary border-brand-primary font-inter font-medium"
+              className="bg-brand-primary border-brand-primary font-inter font-medium w-50"
             >
               Add perimeter
             </Button>
-          </form>
+
+
+          </Form>
+
         </div>
       </main>
     </div>
