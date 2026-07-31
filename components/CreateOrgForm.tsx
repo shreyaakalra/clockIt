@@ -7,7 +7,7 @@ export default function CreateOrgForm() {
 
   const [form] = Form.useForm();
   const router = useRouter();
-  const {user, isLoading} = useUser();
+  const {user} = useUser();
 
   const onFinish = async (values: {orgName: string, name: string}) => {
     if(!user) return;
