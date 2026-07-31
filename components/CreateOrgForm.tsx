@@ -67,7 +67,7 @@ export default function CreateOrgForm() {
       return;
     }
 
-    router.push("/manager/dashboard");
+    router.push("/manager/settings");
   }
 
   

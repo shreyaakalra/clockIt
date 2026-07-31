@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -33,6 +34,7 @@ model Perimeter {
   org   Organization @relation(fields: [orgId], references: [id])
 
   shifts Shift[]
+  users User[]
 
   @@unique([name, orgId])
 }
@@ -46,6 +48,9 @@ model User {
 
   organizationId Int
   organization   Organization @relation(fields: [organizationId], references: [id])
+
+  perimeterId Int?
+  perimeter Perimeter? @relation(fields: [perimeterId], references: [id])
 
   createdAt DateTime @default(now())
 
@@ -73,3 +78,4 @@ model Shift {
 
   createdAt DateTime @default(now())
 }
+

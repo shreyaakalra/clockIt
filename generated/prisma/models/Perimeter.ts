@@ -250,6 +250,7 @@ export type PerimeterWhereInput = {
   orgId?: Prisma.IntFilter<"Perimeter"> | number
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   shifts?: Prisma.ShiftListRelationFilter
+  users?: Prisma.UserListRelationFilter
 }
 
 export type PerimeterOrderByWithRelationInput = {
@@ -262,6 +263,7 @@ export type PerimeterOrderByWithRelationInput = {
   orgId?: Prisma.SortOrder
   org?: Prisma.OrganizationOrderByWithRelationInput
   shifts?: Prisma.ShiftOrderByRelationAggregateInput
+  users?: Prisma.UserOrderByRelationAggregateInput
 }
 
 export type PerimeterWhereUniqueInput = Prisma.AtLeast<{
@@ -278,6 +280,7 @@ export type PerimeterWhereUniqueInput = Prisma.AtLeast<{
   orgId?: Prisma.IntFilter<"Perimeter"> | number
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   shifts?: Prisma.ShiftListRelationFilter
+  users?: Prisma.UserListRelationFilter
 }, "id" | "name_orgId">
 
 export type PerimeterOrderByWithAggregationInput = {
@@ -316,6 +319,7 @@ export type PerimeterCreateInput = {
   createdAt?: Date | string
   org: Prisma.OrganizationCreateNestedOneWithoutPerimetersInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutPerimeterInput
+  users?: Prisma.UserCreateNestedManyWithoutPerimeterInput
 }
 
 export type PerimeterUncheckedCreateInput = {
@@ -327,6 +331,7 @@ export type PerimeterUncheckedCreateInput = {
   createdAt?: Date | string
   orgId: number
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutPerimeterInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutPerimeterInput
 }
 
 export type PerimeterUpdateInput = {
@@ -337,6 +342,7 @@ export type PerimeterUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   org?: Prisma.OrganizationUpdateOneRequiredWithoutPerimetersNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutPerimeterNestedInput
+  users?: Prisma.UserUpdateManyWithoutPerimeterNestedInput
 }
 
 export type PerimeterUncheckedUpdateInput = {
@@ -348,6 +354,7 @@ export type PerimeterUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orgId?: Prisma.IntFieldUpdateOperationsInput | number
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutPerimeterNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutPerimeterNestedInput
 }
 
 export type PerimeterCreateManyInput = {
@@ -439,6 +446,11 @@ export type PerimeterSumOrderByAggregateInput = {
   orgId?: Prisma.SortOrder
 }
 
+export type PerimeterNullableScalarRelationFilter = {
+  is?: Prisma.PerimeterWhereInput | null
+  isNot?: Prisma.PerimeterWhereInput | null
+}
+
 export type PerimeterScalarRelationFilter = {
   is?: Prisma.PerimeterWhereInput
   isNot?: Prisma.PerimeterWhereInput
@@ -498,6 +510,22 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type PerimeterCreateNestedOneWithoutUsersInput = {
+  create?: Prisma.XOR<Prisma.PerimeterCreateWithoutUsersInput, Prisma.PerimeterUncheckedCreateWithoutUsersInput>
+  connectOrCreate?: Prisma.PerimeterCreateOrConnectWithoutUsersInput
+  connect?: Prisma.PerimeterWhereUniqueInput
+}
+
+export type PerimeterUpdateOneWithoutUsersNestedInput = {
+  create?: Prisma.XOR<Prisma.PerimeterCreateWithoutUsersInput, Prisma.PerimeterUncheckedCreateWithoutUsersInput>
+  connectOrCreate?: Prisma.PerimeterCreateOrConnectWithoutUsersInput
+  upsert?: Prisma.PerimeterUpsertWithoutUsersInput
+  disconnect?: Prisma.PerimeterWhereInput | boolean
+  delete?: Prisma.PerimeterWhereInput | boolean
+  connect?: Prisma.PerimeterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PerimeterUpdateToOneWithWhereWithoutUsersInput, Prisma.PerimeterUpdateWithoutUsersInput>, Prisma.PerimeterUncheckedUpdateWithoutUsersInput>
+}
+
 export type PerimeterCreateNestedOneWithoutShiftsInput = {
   create?: Prisma.XOR<Prisma.PerimeterCreateWithoutShiftsInput, Prisma.PerimeterUncheckedCreateWithoutShiftsInput>
   connectOrCreate?: Prisma.PerimeterCreateOrConnectWithoutShiftsInput
@@ -519,6 +547,7 @@ export type PerimeterCreateWithoutOrgInput = {
   radius: number
   createdAt?: Date | string
   shifts?: Prisma.ShiftCreateNestedManyWithoutPerimeterInput
+  users?: Prisma.UserCreateNestedManyWithoutPerimeterInput
 }
 
 export type PerimeterUncheckedCreateWithoutOrgInput = {
@@ -529,6 +558,7 @@ export type PerimeterUncheckedCreateWithoutOrgInput = {
   radius: number
   createdAt?: Date | string
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutPerimeterInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutPerimeterInput
 }
 
 export type PerimeterCreateOrConnectWithoutOrgInput = {
@@ -570,6 +600,64 @@ export type PerimeterScalarWhereInput = {
   orgId?: Prisma.IntFilter<"Perimeter"> | number
 }
 
+export type PerimeterCreateWithoutUsersInput = {
+  name: string
+  latitude: number
+  longitude: number
+  radius: number
+  createdAt?: Date | string
+  org: Prisma.OrganizationCreateNestedOneWithoutPerimetersInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutPerimeterInput
+}
+
+export type PerimeterUncheckedCreateWithoutUsersInput = {
+  id?: number
+  name: string
+  latitude: number
+  longitude: number
+  radius: number
+  createdAt?: Date | string
+  orgId: number
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutPerimeterInput
+}
+
+export type PerimeterCreateOrConnectWithoutUsersInput = {
+  where: Prisma.PerimeterWhereUniqueInput
+  create: Prisma.XOR<Prisma.PerimeterCreateWithoutUsersInput, Prisma.PerimeterUncheckedCreateWithoutUsersInput>
+}
+
+export type PerimeterUpsertWithoutUsersInput = {
+  update: Prisma.XOR<Prisma.PerimeterUpdateWithoutUsersInput, Prisma.PerimeterUncheckedUpdateWithoutUsersInput>
+  create: Prisma.XOR<Prisma.PerimeterCreateWithoutUsersInput, Prisma.PerimeterUncheckedCreateWithoutUsersInput>
+  where?: Prisma.PerimeterWhereInput
+}
+
+export type PerimeterUpdateToOneWithWhereWithoutUsersInput = {
+  where?: Prisma.PerimeterWhereInput
+  data: Prisma.XOR<Prisma.PerimeterUpdateWithoutUsersInput, Prisma.PerimeterUncheckedUpdateWithoutUsersInput>
+}
+
+export type PerimeterUpdateWithoutUsersInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  radius?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  org?: Prisma.OrganizationUpdateOneRequiredWithoutPerimetersNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutPerimeterNestedInput
+}
+
+export type PerimeterUncheckedUpdateWithoutUsersInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  radius?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orgId?: Prisma.IntFieldUpdateOperationsInput | number
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutPerimeterNestedInput
+}
+
 export type PerimeterCreateWithoutShiftsInput = {
   name: string
   latitude: number
@@ -577,6 +665,7 @@ export type PerimeterCreateWithoutShiftsInput = {
   radius: number
   createdAt?: Date | string
   org: Prisma.OrganizationCreateNestedOneWithoutPerimetersInput
+  users?: Prisma.UserCreateNestedManyWithoutPerimeterInput
 }
 
 export type PerimeterUncheckedCreateWithoutShiftsInput = {
@@ -587,6 +676,7 @@ export type PerimeterUncheckedCreateWithoutShiftsInput = {
   radius: number
   createdAt?: Date | string
   orgId: number
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutPerimeterInput
 }
 
 export type PerimeterCreateOrConnectWithoutShiftsInput = {
@@ -612,6 +702,7 @@ export type PerimeterUpdateWithoutShiftsInput = {
   radius?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   org?: Prisma.OrganizationUpdateOneRequiredWithoutPerimetersNestedInput
+  users?: Prisma.UserUpdateManyWithoutPerimeterNestedInput
 }
 
 export type PerimeterUncheckedUpdateWithoutShiftsInput = {
@@ -622,6 +713,7 @@ export type PerimeterUncheckedUpdateWithoutShiftsInput = {
   radius?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orgId?: Prisma.IntFieldUpdateOperationsInput | number
+  users?: Prisma.UserUncheckedUpdateManyWithoutPerimeterNestedInput
 }
 
 export type PerimeterCreateManyOrgInput = {
@@ -640,6 +732,7 @@ export type PerimeterUpdateWithoutOrgInput = {
   radius?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shifts?: Prisma.ShiftUpdateManyWithoutPerimeterNestedInput
+  users?: Prisma.UserUpdateManyWithoutPerimeterNestedInput
 }
 
 export type PerimeterUncheckedUpdateWithoutOrgInput = {
@@ -650,6 +743,7 @@ export type PerimeterUncheckedUpdateWithoutOrgInput = {
   radius?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutPerimeterNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutPerimeterNestedInput
 }
 
 export type PerimeterUncheckedUpdateManyWithoutOrgInput = {
@@ -668,10 +762,12 @@ export type PerimeterUncheckedUpdateManyWithoutOrgInput = {
 
 export type PerimeterCountOutputType = {
   shifts: number
+  users: number
 }
 
 export type PerimeterCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shifts?: boolean | PerimeterCountOutputTypeCountShiftsArgs
+  users?: boolean | PerimeterCountOutputTypeCountUsersArgs
 }
 
 /**
@@ -691,6 +787,13 @@ export type PerimeterCountOutputTypeCountShiftsArgs<ExtArgs extends runtime.Type
   where?: Prisma.ShiftWhereInput
 }
 
+/**
+ * PerimeterCountOutputType without action
+ */
+export type PerimeterCountOutputTypeCountUsersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserWhereInput
+}
+
 
 export type PerimeterSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -702,6 +805,7 @@ export type PerimeterSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   orgId?: boolean
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   shifts?: boolean | Prisma.Perimeter$shiftsArgs<ExtArgs>
+  users?: boolean | Prisma.Perimeter$usersArgs<ExtArgs>
   _count?: boolean | Prisma.PerimeterCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["perimeter"]>
 
@@ -741,6 +845,7 @@ export type PerimeterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type PerimeterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   shifts?: boolean | Prisma.Perimeter$shiftsArgs<ExtArgs>
+  users?: boolean | Prisma.Perimeter$usersArgs<ExtArgs>
   _count?: boolean | Prisma.PerimeterCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PerimeterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -755,6 +860,7 @@ export type $PerimeterPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     org: Prisma.$OrganizationPayload<ExtArgs>
     shifts: Prisma.$ShiftPayload<ExtArgs>[]
+    users: Prisma.$UserPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1160,6 +1266,7 @@ export interface Prisma__PerimeterClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   org<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   shifts<T extends Prisma.Perimeter$shiftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Perimeter$shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  users<T extends Prisma.Perimeter$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Perimeter$usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1618,6 +1725,30 @@ export type Perimeter$shiftsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ShiftScalarFieldEnum | Prisma.ShiftScalarFieldEnum[]
+}
+
+/**
+ * Perimeter.users
+ */
+export type Perimeter$usersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+  orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]
+  cursor?: Prisma.UserWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserScalarFieldEnum | Prisma.UserScalarFieldEnum[]
 }
 
 /**

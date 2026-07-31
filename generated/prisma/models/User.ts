@@ -29,11 +29,13 @@ export type AggregateUser = {
 export type UserAvgAggregateOutputType = {
   id: number | null
   organizationId: number | null
+  perimeterId: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
   organizationId: number | null
+  perimeterId: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type UserMinAggregateOutputType = {
   name: string | null
   role: $Enums.Role | null
   organizationId: number | null
+  perimeterId: number | null
   createdAt: Date | null
 }
 
@@ -53,6 +56,7 @@ export type UserMaxAggregateOutputType = {
   name: string | null
   role: $Enums.Role | null
   organizationId: number | null
+  perimeterId: number | null
   createdAt: Date | null
 }
 
@@ -63,6 +67,7 @@ export type UserCountAggregateOutputType = {
   name: number
   role: number
   organizationId: number
+  perimeterId: number
   createdAt: number
   _all: number
 }
@@ -71,11 +76,13 @@ export type UserCountAggregateOutputType = {
 export type UserAvgAggregateInputType = {
   id?: true
   organizationId?: true
+  perimeterId?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
   organizationId?: true
+  perimeterId?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -85,6 +92,7 @@ export type UserMinAggregateInputType = {
   name?: true
   role?: true
   organizationId?: true
+  perimeterId?: true
   createdAt?: true
 }
 
@@ -95,6 +103,7 @@ export type UserMaxAggregateInputType = {
   name?: true
   role?: true
   organizationId?: true
+  perimeterId?: true
   createdAt?: true
 }
 
@@ -105,6 +114,7 @@ export type UserCountAggregateInputType = {
   name?: true
   role?: true
   organizationId?: true
+  perimeterId?: true
   createdAt?: true
   _all?: true
 }
@@ -202,6 +212,7 @@ export type UserGroupByOutputType = {
   name: string
   role: $Enums.Role
   organizationId: number
+  perimeterId: number | null
   createdAt: Date
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
@@ -235,8 +246,10 @@ export type UserWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   organizationId?: Prisma.IntFilter<"User"> | number
+  perimeterId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  perimeter?: Prisma.XOR<Prisma.PerimeterNullableScalarRelationFilter, Prisma.PerimeterWhereInput> | null
   shifts?: Prisma.ShiftListRelationFilter
 }
 
@@ -247,8 +260,10 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   role?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
+  perimeter?: Prisma.PerimeterOrderByWithRelationInput
   shifts?: Prisma.ShiftOrderByRelationAggregateInput
 }
 
@@ -262,8 +277,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   organizationId?: Prisma.IntFilter<"User"> | number
+  perimeterId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  perimeter?: Prisma.XOR<Prisma.PerimeterNullableScalarRelationFilter, Prisma.PerimeterWhereInput> | null
   shifts?: Prisma.ShiftListRelationFilter
 }, "id" | "authId" | "email">
 
@@ -274,6 +291,7 @@ export type UserOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   role?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
@@ -292,6 +310,7 @@ export type UserScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   organizationId?: Prisma.IntWithAggregatesFilter<"User"> | number
+  perimeterId?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
@@ -302,6 +321,7 @@ export type UserCreateInput = {
   role: $Enums.Role
   createdAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutUsersInput
+  perimeter?: Prisma.PerimeterCreateNestedOneWithoutUsersInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutUserInput
 }
 
@@ -312,6 +332,7 @@ export type UserUncheckedCreateInput = {
   name: string
   role: $Enums.Role
   organizationId: number
+  perimeterId?: number | null
   createdAt?: Date | string
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutUserInput
 }
@@ -323,6 +344,7 @@ export type UserUpdateInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutUsersNestedInput
+  perimeter?: Prisma.PerimeterUpdateOneWithoutUsersNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutUserNestedInput
 }
 
@@ -333,6 +355,7 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
+  perimeterId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -344,6 +367,7 @@ export type UserCreateManyInput = {
   name: string
   role: $Enums.Role
   organizationId: number
+  perimeterId?: number | null
   createdAt?: Date | string
 }
 
@@ -362,6 +386,7 @@ export type UserUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
+  perimeterId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -382,12 +407,14 @@ export type UserCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   role?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -397,6 +424,7 @@ export type UserMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   role?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -407,12 +435,14 @@ export type UserMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   role?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  perimeterId?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -462,8 +492,58 @@ export type UserUncheckedUpdateManyWithoutOrganizationNestedInput = {
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
+export type UserCreateNestedManyWithoutPerimeterInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPerimeterInput, Prisma.UserUncheckedCreateWithoutPerimeterInput> | Prisma.UserCreateWithoutPerimeterInput[] | Prisma.UserUncheckedCreateWithoutPerimeterInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPerimeterInput | Prisma.UserCreateOrConnectWithoutPerimeterInput[]
+  createMany?: Prisma.UserCreateManyPerimeterInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutPerimeterInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPerimeterInput, Prisma.UserUncheckedCreateWithoutPerimeterInput> | Prisma.UserCreateWithoutPerimeterInput[] | Prisma.UserUncheckedCreateWithoutPerimeterInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPerimeterInput | Prisma.UserCreateOrConnectWithoutPerimeterInput[]
+  createMany?: Prisma.UserCreateManyPerimeterInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUpdateManyWithoutPerimeterNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPerimeterInput, Prisma.UserUncheckedCreateWithoutPerimeterInput> | Prisma.UserCreateWithoutPerimeterInput[] | Prisma.UserUncheckedCreateWithoutPerimeterInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPerimeterInput | Prisma.UserCreateOrConnectWithoutPerimeterInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutPerimeterInput | Prisma.UserUpsertWithWhereUniqueWithoutPerimeterInput[]
+  createMany?: Prisma.UserCreateManyPerimeterInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutPerimeterInput | Prisma.UserUpdateWithWhereUniqueWithoutPerimeterInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutPerimeterInput | Prisma.UserUpdateManyWithWhereWithoutPerimeterInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutPerimeterNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPerimeterInput, Prisma.UserUncheckedCreateWithoutPerimeterInput> | Prisma.UserCreateWithoutPerimeterInput[] | Prisma.UserUncheckedCreateWithoutPerimeterInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPerimeterInput | Prisma.UserCreateOrConnectWithoutPerimeterInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutPerimeterInput | Prisma.UserUpsertWithWhereUniqueWithoutPerimeterInput[]
+  createMany?: Prisma.UserCreateManyPerimeterInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutPerimeterInput | Prisma.UserUpdateWithWhereUniqueWithoutPerimeterInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutPerimeterInput | Prisma.UserUpdateManyWithWhereWithoutPerimeterInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
 export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type UserCreateNestedOneWithoutShiftsInput = {
@@ -486,6 +566,7 @@ export type UserCreateWithoutOrganizationInput = {
   name: string
   role: $Enums.Role
   createdAt?: Date | string
+  perimeter?: Prisma.PerimeterCreateNestedOneWithoutUsersInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutUserInput
 }
 
@@ -495,6 +576,7 @@ export type UserUncheckedCreateWithoutOrganizationInput = {
   email: string
   name: string
   role: $Enums.Role
+  perimeterId?: number | null
   createdAt?: Date | string
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutUserInput
 }
@@ -535,7 +617,55 @@ export type UserScalarWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   organizationId?: Prisma.IntFilter<"User"> | number
+  perimeterId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+}
+
+export type UserCreateWithoutPerimeterInput = {
+  authId: string
+  email: string
+  name: string
+  role: $Enums.Role
+  createdAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutUsersInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPerimeterInput = {
+  id?: number
+  authId: string
+  email: string
+  name: string
+  role: $Enums.Role
+  organizationId: number
+  createdAt?: Date | string
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPerimeterInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPerimeterInput, Prisma.UserUncheckedCreateWithoutPerimeterInput>
+}
+
+export type UserCreateManyPerimeterInputEnvelope = {
+  data: Prisma.UserCreateManyPerimeterInput | Prisma.UserCreateManyPerimeterInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithWhereUniqueWithoutPerimeterInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPerimeterInput, Prisma.UserUncheckedUpdateWithoutPerimeterInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPerimeterInput, Prisma.UserUncheckedCreateWithoutPerimeterInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutPerimeterInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPerimeterInput, Prisma.UserUncheckedUpdateWithoutPerimeterInput>
+}
+
+export type UserUpdateManyWithWhereWithoutPerimeterInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutPerimeterInput>
 }
 
 export type UserCreateWithoutShiftsInput = {
@@ -545,6 +675,7 @@ export type UserCreateWithoutShiftsInput = {
   role: $Enums.Role
   createdAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutUsersInput
+  perimeter?: Prisma.PerimeterCreateNestedOneWithoutUsersInput
 }
 
 export type UserUncheckedCreateWithoutShiftsInput = {
@@ -554,6 +685,7 @@ export type UserUncheckedCreateWithoutShiftsInput = {
   name: string
   role: $Enums.Role
   organizationId: number
+  perimeterId?: number | null
   createdAt?: Date | string
 }
 
@@ -580,6 +712,7 @@ export type UserUpdateWithoutShiftsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutUsersNestedInput
+  perimeter?: Prisma.PerimeterUpdateOneWithoutUsersNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShiftsInput = {
@@ -589,6 +722,7 @@ export type UserUncheckedUpdateWithoutShiftsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
+  perimeterId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -598,6 +732,7 @@ export type UserCreateManyOrganizationInput = {
   email: string
   name: string
   role: $Enums.Role
+  perimeterId?: number | null
   createdAt?: Date | string
 }
 
@@ -607,6 +742,7 @@ export type UserUpdateWithoutOrganizationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  perimeter?: Prisma.PerimeterUpdateOneWithoutUsersNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutUserNestedInput
 }
 
@@ -616,6 +752,7 @@ export type UserUncheckedUpdateWithoutOrganizationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  perimeterId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -626,6 +763,48 @@ export type UserUncheckedUpdateManyWithoutOrganizationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  perimeterId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserCreateManyPerimeterInput = {
+  id?: number
+  authId: string
+  email: string
+  name: string
+  role: $Enums.Role
+  organizationId: number
+  createdAt?: Date | string
+}
+
+export type UserUpdateWithoutPerimeterInput = {
+  authId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutUsersNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPerimeterInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  authId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  organizationId?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutPerimeterInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  authId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  organizationId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -667,8 +846,10 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   role?: boolean
   organizationId?: boolean
+  perimeterId?: boolean
   createdAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  perimeter?: boolean | Prisma.User$perimeterArgs<ExtArgs>
   shifts?: boolean | Prisma.User$shiftsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -680,8 +861,10 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   role?: boolean
   organizationId?: boolean
+  perimeterId?: boolean
   createdAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  perimeter?: boolean | Prisma.User$perimeterArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -691,8 +874,10 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   role?: boolean
   organizationId?: boolean
+  perimeterId?: boolean
   createdAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  perimeter?: boolean | Prisma.User$perimeterArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -702,26 +887,31 @@ export type UserSelectScalar = {
   name?: boolean
   role?: boolean
   organizationId?: boolean
+  perimeterId?: boolean
   createdAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authId" | "email" | "name" | "role" | "organizationId" | "createdAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authId" | "email" | "name" | "role" | "organizationId" | "perimeterId" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  perimeter?: boolean | Prisma.User$perimeterArgs<ExtArgs>
   shifts?: boolean | Prisma.User$shiftsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  perimeter?: boolean | Prisma.User$perimeterArgs<ExtArgs>
 }
 export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  perimeter?: boolean | Prisma.User$perimeterArgs<ExtArgs>
 }
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
+    perimeter: Prisma.$PerimeterPayload<ExtArgs> | null
     shifts: Prisma.$ShiftPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -731,6 +921,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     role: $Enums.Role
     organizationId: number
+    perimeterId: number | null
     createdAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -1127,6 +1318,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  perimeter<T extends Prisma.User$perimeterArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$perimeterArgs<ExtArgs>>): Prisma.Prisma__PerimeterClient<runtime.Types.Result.GetResult<Prisma.$PerimeterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   shifts<T extends Prisma.User$shiftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1163,6 +1355,7 @@ export interface UserFieldRefs {
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly organizationId: Prisma.FieldRef<"User", 'Int'>
+  readonly perimeterId: Prisma.FieldRef<"User", 'Int'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
@@ -1562,6 +1755,25 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Users to delete.
    */
   limit?: number
+}
+
+/**
+ * User.perimeter
+ */
+export type User$perimeterArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Perimeter
+   */
+  select?: Prisma.PerimeterSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Perimeter
+   */
+  omit?: Prisma.PerimeterOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PerimeterInclude<ExtArgs> | null
+  where?: Prisma.PerimeterWhereInput
 }
 
 /**
