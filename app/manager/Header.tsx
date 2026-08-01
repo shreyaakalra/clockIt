@@ -1,15 +1,20 @@
+import Link from "next/link";
+
 export default function Header(){
     return(
         <header className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto gap-2">
 
-            <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center bg-brand-primary">
-                <span className="w-3 h-3 rounded-full bg-white block" />
-                </span>
-                <span className="font-jost font-semibold text-xl tracking-tight text-brand-heading">
-                clock it
-                </span>
-            </div>
+            <Link href={"/"}>
+                <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center bg-brand-primary">
+                    <span className="w-3 h-3 rounded-full bg-white block" />
+                    </span>
+                    <span className="font-jost font-semibold text-xl tracking-tight text-brand-heading">
+                    clock it
+                    </span>
+                </div>
+            </Link>
+            
 
             <nav className="flex items-center sm:gap-16 md:gap-16 gap-2 font-inter text-sm">
                 <a href="/manager/dashboard" className="text-brand-muted underline underline-offset-4">Dashboard</a>

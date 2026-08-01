@@ -1,7 +1,5 @@
 "use client";
 
-import { useUser } from "@auth0/nextjs-auth0";
-import { Progress } from "antd";
 import { useEffect, useState } from "react";
 import Header from "../Header";
 import { Bar } from "react-chartjs-2";
@@ -12,6 +10,7 @@ import {
   BarElement,
   Tooltip,
 } from "chart.js";
+import { useAppUser } from "@/contexts/UserContext";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
@@ -28,15 +27,14 @@ type StaffMember = {
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function ManagerDashboard() {
-  const { user } = useUser();
+  const { appUser } = useAppUser();
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState<StaffMember[]>([]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!appUser) return;
 
     const getShifts = async () => {
-
       const orgResponse = await fetch("/api/graphql", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,7 +46,7 @@ export default function ManagerDashboard() {
               }
             }
           `,
-          variables: { email: user.email },
+          variables: { email: appUser.email },
         }),
       });
 
@@ -60,7 +58,8 @@ export default function ManagerDashboard() {
         return;
       }
 
-      const organizationId = orgResult.data.getUserInformationByEmail.organizationId;
+      const organizationId =
+        orgResult.data.getUserInformationByEmail.organizationId;
 
       const staffResponse = await fetch("/api/graphql", {
         method: "POST",
@@ -96,8 +95,7 @@ export default function ManagerDashboard() {
     };
 
     getShifts();
-
-  }, [user]);
+  }, [appUser]);
 
   const [timeRange] = useState(() => {
     const now = Date.now();
@@ -110,25 +108,27 @@ export default function ManagerDashboard() {
 
   console.log(staff);
 
-  const allShifts = staff.flatMap((person) => 
-    person.shifts.map((s) => ({...s, name: person.name}))
-  )
+  const allShifts = staff.flatMap((person) =>
+    person.shifts.map((s) => ({ ...s, name: person.name })),
+  );
 
   //console.log(allShifts);
 
-  const staffHours = staff.map((person) => {
+  const staffHours = staff
+    .map((person) => {
+      const hours = person.shifts.reduce((total, shift) => {
+        const clockIn = Number(shift.clockInTime);
+        if (clockIn < timeRange.oneWeekAgo) return total;
+        const clockOut = shift.clockOutTime
+          ? Number(shift.clockOutTime)
+          : timeRange.now;
+        return total + (clockOut - clockIn) / (60 * 60 * 1000);
+      }, 0);
 
-    const hours = person.shifts.reduce((total, shift) => {
-      const clockIn = Number(shift.clockInTime);
-      if(clockIn < timeRange.oneWeekAgo) return total;
-      const clockOut = shift.clockOutTime ? Number(shift.clockOutTime) : timeRange.now;
-      return total + (clockOut-clockIn) / (60 * 60 * 1000);
-    },0);
-
-    return{name: person.name, hours: Math.round(hours)};
-  })
-  .filter((s) => s.hours>0)
-  .sort((a,b) => b.hours - a.hours)
+      return { name: person.name, hours: Math.round(hours) };
+    })
+    .filter((s) => s.hours > 0)
+    .sort((a, b) => b.hours - a.hours);
 
   // console.log(staffHours);
 
@@ -138,15 +138,20 @@ export default function ManagerDashboard() {
 
   const avgHoursLabel = `${Math.floor(avgHoursPerDay)}h ${Math.round((avgHoursPerDay % 1) * 60)}m`;
 
-  const onShiftNow = staff.map((person) => {
+  const onShiftNow = staff
+    .map((person) => {
       const openShift = person.shifts.find((s) => !s.clockOutTime);
       if (!openShift) return null;
-      return { name: person.name, since: new Date(Number(openShift.clockInTime)).toLocaleTimeString() };
+      return {
+        name: person.name,
+        since: new Date(Number(openShift.clockInTime)).toLocaleTimeString(),
+      };
     })
     .filter((p): p is NonNullable<typeof p> => p !== null);
 
-  const clockInsToday = allShifts.filter((s) => Number(s.clockInTime) >= timeRange.startOfToday).length;
-
+  const clockInsToday = allShifts.filter(
+    (s) => Number(s.clockInTime) >= timeRange.startOfToday,
+  ).length;
 
   const weeklyClockIns = Array.from({ length: 7 }).map((_, i) => {
     const dayStart = timeRange.startOfToday - (6 - i) * 24 * 60 * 60 * 1000;
@@ -173,18 +178,18 @@ export default function ManagerDashboard() {
       <Header />
 
       <main className="max-w-6xl mx-auto px-6 pb-16">
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-          <StatCard label="Avg. hours / day" value={avgHoursLabel} sublabel="last 7 days" />
+          <StatCard
+            label="Avg. hours / day"
+            value={avgHoursLabel}
+            sublabel="last 7 days"
+          />
           <StatCard
             label="Clocked in now"
             value={String(onShiftNow.length)}
             sublabel={`of ${staff.length} staff`}
           />
-          <StatCard
-            label="Clock-ins today"
-            value={String(clockInsToday)}
-          />
+          <StatCard label="Clock-ins today" value={String(clockInsToday)} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -213,7 +218,10 @@ export default function ManagerDashboard() {
                   scales: {
                     y: {
                       beginAtZero: true,
-                      ticks: { stepSize: 1, font: { family: "var(--font-inter)" } },
+                      ticks: {
+                        stepSize: 1,
+                        font: { family: "var(--font-inter)" },
+                      },
                       grid: { color: "#EAF3F3" },
                     },
                     x: {
@@ -228,26 +236,45 @@ export default function ManagerDashboard() {
 
           <div className="bg-white rounded-2xl border border-brand-border p-6">
             <h2 className="font-jost text-base font-semibold text-brand-heading mb-6">
-              Total hours per staff this week
+              Total hours per staff &middot; last 7 days
             </h2>
             {staffHours.length === 0 ? (
-              <p className="text-sm text-brand-muted font-inter">No shifts logged yet this week.</p>
+              <p className="text-sm text-brand-muted font-inter">
+                No shifts logged yet this week.
+              </p>
             ) : (
-              <div className="flex flex-col gap-4">
-                {staffHours.map((s) => (
-                  <div key={s.name}>
-                    <div className="flex justify-between text-sm font-inter mb-1">
-                      <span className="text-brand-text">{s.name}</span>
-                      <span className="text-brand-muted">{s.hours}h</span>
-                    </div>
-                    <Progress
-                      percent={(s.hours / maxStaffHours) * 100}
-                      showInfo={true}
-                      strokeColor="#00AFAA"
-                      railColor="#EAF3F3"
-                    />
-                  </div>
-                ))}
+              <div style={{ height: `${staffHours.length * 44 + 20}px` }}>
+                <Bar
+                  data={{
+                    labels: staffHours.map((s) => s.name),
+                    datasets: [
+                      {
+                        data: staffHours.map((s) => s.hours),
+                        backgroundColor: "#00AFAA",
+                        borderRadius: 6,
+                      },
+                    ],
+                  }}
+                  options={{
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                    },
+                    scales: {
+                      x: {
+                        beginAtZero: true,
+                        ticks: { font: { family: "var(--font-inter)" } },
+                        grid: { color: "#EAF3F3" },
+                      },
+                      y: {
+                        ticks: { font: { family: "var(--font-inter)" } },
+                        grid: { display: false },
+                      },
+                    },
+                  }}
+                />
               </div>
             )}
           </div>
@@ -258,24 +285,36 @@ export default function ManagerDashboard() {
             <h2 className="font-jost text-base font-semibold text-brand-heading">
               On shift right now
             </h2>
-            <a href="/manager/staff" className="text-sm text-brand-primary font-inter font-medium">
+            <a
+              href="/manager/staff"
+              className="text-sm text-brand-primary font-inter font-medium"
+            >
               View all staff &rarr;
             </a>
           </div>
           {onShiftNow.length === 0 ? (
-            <p className="text-sm text-brand-muted font-inter">No one is clocked in right now.</p>
+            <p className="text-sm text-brand-muted font-inter">
+              No one is clocked in right now.
+            </p>
           ) : (
             <div className="flex flex-col gap-3">
               {onShiftNow.map((p) => (
-                <div key={p.name} className="flex items-center justify-between py-2 border-b border-brand-border last:border-0">
+                <div
+                  key={p.name}
+                  className="flex items-center justify-between py-2 border-b border-brand-border last:border-0"
+                >
                   <div className="flex items-center gap-3">
                     <span className="relative flex items-center justify-center w-2.5 h-2.5">
                       <span className="absolute inline-flex h-full w-full rounded-full opacity-60 motion-safe:animate-ping bg-brand-primary" />
                       <span className="relative inline-flex rounded-full w-2.5 h-2.5 bg-brand-primary" />
                     </span>
-                    <span className="text-sm font-inter text-brand-text">{p.name}</span>
+                    <span className="text-sm font-inter text-brand-text">
+                      {p.name}
+                    </span>
                   </div>
-                  <span className="text-xs text-brand-muted font-inter">since {p.since}</span>
+                  <span className="text-xs text-brand-muted font-inter">
+                    since {p.since}
+                  </span>
                 </div>
               ))}
             </div>
@@ -286,15 +325,23 @@ export default function ManagerDashboard() {
   );
 }
 
-
-
-function StatCard({ label, value, sublabel }: { label: string; value: string; sublabel?: string }) {
+function StatCard({
+  label,
+  value,
+  sublabel,
+}: {
+  label: string;
+  value: string;
+  sublabel?: string;
+}) {
   return (
     <div className="bg-white rounded-2xl border border-brand-border p-6">
       <p className="text-xs uppercase tracking-[0.15em] text-brand-muted font-semibold mb-3">
         {label}
       </p>
-      <p className="font-jost text-3xl font-semibold text-brand-heading mb-1">{value}</p>
+      <p className="font-jost text-3xl font-semibold text-brand-heading mb-1">
+        {value}
+      </p>
       <p className="text-xs text-brand-muted font-inter">{sublabel}</p>
     </div>
   );

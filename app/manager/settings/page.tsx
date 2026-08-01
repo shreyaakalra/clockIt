@@ -5,14 +5,7 @@ import { Button, Form, Input } from "antd";
 import { useUser } from "@auth0/nextjs-auth0";
 import { useRouter } from "next/navigation";
 import Header from "../Header";
-
-type PerimeterType = {
-    id: number,
-    name: string,
-    latitude: number,
-    longitude: number,
-    radius: number
-}
+import { useAppUser } from "@/contexts/UserContext";
 
 type PerimeterFormValues = {
     name: string;
@@ -40,20 +33,20 @@ function ReadOnlyGeoField({
 }
 
 export default function ManagerSettingsPage(){
+  const { appUser } = useAppUser();
+  
   const [form] = Form.useForm<PerimeterFormValues>();
-  const {user} = useUser();
   const router = useRouter();
 
   const [copied, setCopied] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
-  const [perimeters, setPerimeters] = useState<PerimeterType[]>([])
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
 
     async function gettingOrgInfo(){
-      if(!user) return;
+      if(!appUser) return;
 
       const userResponse = await fetch('/api/graphql', {
           method: "POST",
@@ -66,7 +59,7 @@ export default function ManagerSettingsPage(){
                       }
                   }
               `,
-              variables: {email: user.email}
+              variables: {email: appUser.email}
           })
       });
 
@@ -118,13 +111,12 @@ export default function ManagerSettingsPage(){
 
       setName(orgDetails.name);
       setInviteCode(orgDetails.inviteCode);
-      setPerimeters(orgDetails.perimeters);
       setLoading(false);
       console.log(orgDetails.perimeters);
     }
 
     gettingOrgInfo();
-  }, [user])
+  }, [appUser])
 
   
 
@@ -156,36 +148,7 @@ export default function ManagerSettingsPage(){
 
   const onFinish = async(values: PerimeterFormValues) => {
 
-    if(!user) return;
-
-    const userResponse = await fetch('/api/graphql', {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            query: `
-                query($email: String!){
-                    getUserInformationByEmail(email: $email){
-                        organizationId
-                    }
-                }
-            `,
-            variables: {email: user.email}
-        })
-    });
-
-    const userResult = await userResponse.json();
-
-    if(userResult.errors){
-        console.log(userResult.errors);
-        return;
-    }
-
-    const userDetails = userResult.data.getUserInformationByEmail;
-
-    if(!userDetails){
-        console.log("couldn't find your user record.")
-        return;
-    }
+    if(!appUser) return;
 
     const perimeterResponse = await fetch('/api/graphql', {
         method: "POST",
@@ -203,7 +166,7 @@ export default function ManagerSettingsPage(){
                 latitude: values.latitude,
                 longitude: values.longitude,
                 radius: Number(values.radius),
-                orgId: userDetails.organizationId
+                orgId: appUser.organizationId
             }
         })
     })

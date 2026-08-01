@@ -1,9 +1,9 @@
 "use client";
 
-import { useUser } from "@auth0/nextjs-auth0";
 import { Table, Tag } from "antd";
 import { useEffect, useState } from "react";
 import Header from "../Header";
+import { useAppUser } from "@/contexts/UserContext";
 
 const onShiftColumns = [
   { title: "Name", dataIndex: "name", key: "name" },
@@ -40,12 +40,12 @@ type StaffMember = {
 };
 
 export default function ManagerStaffPage() {
-  const { user } = useUser();
+  const { appUser } = useAppUser();
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState<StaffMember[]>([]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!appUser) return;
 
     (async () => {
       const orgResponse = await fetch("/api/graphql", {
@@ -59,9 +59,10 @@ export default function ManagerStaffPage() {
               }
             }
           `,
-          variables: { email: user.email },
+          variables: { email: appUser.email },
         }),
       });
+      
       const orgResult = await orgResponse.json();
       if (orgResult.errors) {
         console.log(orgResult.errors);
@@ -103,7 +104,7 @@ export default function ManagerStaffPage() {
       setStaff(staffResult.data.usersByOrganization ?? []);
       setLoading(false);
     })();
-  }, [user]);
+  }, [appUser]);
 
   const [timestamp] = useState(() => {
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
