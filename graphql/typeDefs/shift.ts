@@ -16,12 +16,12 @@ export const shiftTypeDefs = `
 
     type Query{
         showShiftDetails(userId: Int!): [Shift]
+
+        checkPerimeter(perimeterId: Int!, latitude: Float!, longitude: Float!): Boolean
     }
 
     type Mutation{
         clockIn(userId: Int!, perimeterId: Int!, clockInLatitude: Float!, clockInLongitude: Float!, clockInNote: String): Shift
-
-        checkPerimeter(perimeterId: Int!, latitude: Float!, longitude: Float!): Boolean
 
         clockOut(shiftId: Int!, clockOutLatitude: Float!, clockOutLongitude: Float!, clockOutNote: String): Shift
     }

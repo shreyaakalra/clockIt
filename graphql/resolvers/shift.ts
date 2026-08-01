@@ -24,7 +24,20 @@ export const shiftResolver = {
                     userId: args.userId
                 }
             })
-        }
+        },
+
+        checkPerimeter: async (_parent: unknown, args: { perimeterId: number; latitude: number; longitude: number }) => {
+            const perimeter = await prisma.perimeter.findUnique({
+                where: { id: args.perimeterId },
+            });
+
+            if (!perimeter) {
+                throw new GraphQLError("Perimeter not found.");
+            }
+
+            const distance = getDistanceKm(args.latitude, args.longitude, perimeter.latitude, perimeter.longitude);
+            return distance <= perimeter.radius;
+        },
     },
 
     Mutation: {
@@ -101,19 +114,6 @@ export const shiftResolver = {
                     clockOutNote: args.clockOutNote
                 }
             })
-        },
-
-        checkPerimeter: async (_parent: unknown, args: { perimeterId: number; latitude: number; longitude: number }) => {
-            const perimeter = await prisma.perimeter.findUnique({
-                where: { id: args.perimeterId },
-            });
-
-            if (!perimeter) {
-                throw new GraphQLError("Perimeter not found.");
-            }
-
-            const distance = getDistanceKm(args.latitude, args.longitude, perimeter.latitude, perimeter.longitude);
-            return distance <= perimeter.radius;
         },
     }
 }

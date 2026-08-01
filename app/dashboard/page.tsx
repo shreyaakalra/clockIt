@@ -76,7 +76,6 @@ export default function CareWorkerDashboard() {
     });
   };
 
-  // Checks perimeter status only — used on load
   const runPerimeterCheck = async (targetPerimeterId: number) => {
     try {
       const coords = await getGeoLocation();
@@ -150,7 +149,6 @@ export default function CareWorkerDashboard() {
     setIsClockedIn(!!openShift);
     setOpenShiftId(openShift ? openShift.id : null);
 
-    // Only worth checking the perimeter proactively if not already clocked in
     if (!openShift && userData.perimeterId) {
       await runPerimeterCheck(userData.perimeterId);
     } else {
