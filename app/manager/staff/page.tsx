@@ -25,15 +25,6 @@ const allStaffColumns = [
     ),
   },
   { title: "Hours this week", dataIndex: "hoursThisWeek", key: "hoursThisWeek", render: (h: number) => `${h}h` },
-  {
-    title: "",
-    key: "action",
-    render: (_: unknown, record: { key: number }) => (
-      <a href={`/manager/staff/${record.key}`} className="text-brand-primary font-inter font-medium">
-        View history &rarr;
-      </a>
-    ),
-  },
 ];
 
 type StaffMember = {
@@ -114,7 +105,12 @@ export default function ManagerStaffPage() {
     })();
   }, [user]);
 
-  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const [timestamp] = useState(() => {
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return {oneWeekAgo};
+  }
+    
+  ) 
 
   const onShiftData = staff
     .map((person) => {
@@ -134,7 +130,7 @@ export default function ManagerStaffPage() {
 
     const hoursThisWeek = person.shifts.reduce((total, shift) => {
       const clockIn = Number(shift.clockInTime);
-      if (clockIn < oneWeekAgo) return total;
+      if (clockIn < timestamp.oneWeekAgo) return total;
       const clockOut = shift.clockOutTime ? Number(shift.clockOutTime) : Date.now();
       return total + (clockOut - clockIn) / (1000 * 60 * 60);
     }, 0);
@@ -168,7 +164,7 @@ export default function ManagerStaffPage() {
               <span className="relative inline-flex rounded-full w-2.5 h-2.5 bg-brand-primary" />
             </span>
             <h2 className="font-jost text-base font-semibold text-brand-heading">
-              Clocked in now &middot; {onShiftData.length}
+              Clocked in now
             </h2>
           </div>
           <Table
