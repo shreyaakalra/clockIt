@@ -6,8 +6,6 @@ import { useUser } from "@auth0/nextjs-auth0";
 import { useRouter } from "next/navigation";
 import Header from "../Header";
 
-const mockInviteCode = "RIVER-7F2K";
-
 type PerimeterType = {
     id: number,
     name: string,
@@ -227,8 +225,8 @@ export default function ManagerSettingsPage(){
     <div className="min-h-screen bg-brand-bg">
 
       {loading ? (
-        <div>
-          Loading
+        <div className="min-h-screen bg-brand-bg flex items-center justify-center">
+          <p className="font-inter text-brand-muted">Loading...</p>
         </div>
       ):(
         <div>
@@ -254,32 +252,10 @@ export default function ManagerSettingsPage(){
         </div>
 
         <div className="bg-white rounded-2xl border border-brand-border p-6">
-          <h2 className="font-jost text-base font-semibold text-brand-heading mb-5">
-            Clock-in perimeters
-          </h2>
-
-          {/*<div className="flex flex-col gap-3 mb-6">
-            {perimeters.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center justify-between border border-brand-border rounded-xl px-4 py-3"
-              >
-                <div>
-                  <p className="font-inter font-medium text-brand-text text-sm">{p.name}</p>
-                  <p className="text-xs text-brand-muted font-inter">
-                    {p.latitude}, {p.longitude} &middot; {p.radius} km radius
-                  </p>
-                </div>
-                <button className="text-xs text-brand-muted underline underline-offset-4">
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>*/}
-
+      
           <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
             <Form.Item>
-                <p className="font-inter font-medium text-brand-heading text-sm mb-4">
+                <p className="font-inter font-black text-brand-primary text-2xl mb-2">
                     Add a new perimeter
                 </p>
             </Form.Item>
@@ -358,7 +334,7 @@ export default function ManagerSettingsPage(){
             <Button
               htmlType="submit"
               type="primary"
-              className="bg-brand-primary border-brand-primary font-inter font-medium w-50"
+              className="bg-brand-primary border-brand-primary font-inter font-medium w-full"
             >
               Add perimeter
             </Button>
