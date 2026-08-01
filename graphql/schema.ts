@@ -1,4 +1,3 @@
-// graphql/schema.ts
 import { createSchema } from "graphql-yoga";
 import { typeDefs } from "./typeDefs";
 import { resolvers } from "./resolvers";
