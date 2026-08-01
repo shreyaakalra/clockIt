@@ -11,22 +11,6 @@ const onShiftColumns = [
   { title: "Note", dataIndex: "note", key: "note", ellipsis: true },
 ];
 
-const allStaffColumns = [
-  { title: "Name", dataIndex: "name", key: "name" },
-  { title: "Role", dataIndex: "role", key: "role" },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-    render: (status: string) => (
-      <Tag color={status === "on-shift" ? "success" : "default"}>
-        {status === "on-shift" ? "On shift" : "Off shift"}
-      </Tag>
-    ),
-  },
-  { title: "Hours this week", dataIndex: "hoursThisWeek", key: "hoursThisWeek", render: (h: number) => `${h}h` },
-];
-
 type StaffMember = {
   id: number;
   name: string;
@@ -34,7 +18,11 @@ type StaffMember = {
   shifts: {
     id: number;
     clockInTime: string;
+    clockInLatitude: number;
+    clockInLongitude: number;
     clockOutTime: string | null;
+    clockOutLatitude: number | null;
+    clockOutLongitude: number | null;
     clockInNote: string | null;
   }[];
 };
@@ -43,6 +31,7 @@ export default function ManagerStaffPage() {
   const { appUser } = useAppUser();
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<number[]>([]);
 
   useEffect(() => {
     if (!appUser) return;
@@ -62,7 +51,7 @@ export default function ManagerStaffPage() {
           variables: { email: appUser.email },
         }),
       });
-      
+
       const orgResult = await orgResponse.json();
       if (orgResult.errors) {
         console.log(orgResult.errors);
@@ -85,7 +74,11 @@ export default function ManagerStaffPage() {
                 shifts {
                   id
                   clockInTime
+                  clockInLatitude
+                  clockInLongitude
                   clockOutTime
+                  clockOutLatitude
+                  clockOutLongitude
                   clockInNote
                 }
               }
@@ -108,10 +101,8 @@ export default function ManagerStaffPage() {
 
   const [timestamp] = useState(() => {
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return {oneWeekAgo};
-  }
-    
-  ) 
+    return { oneWeekAgo };
+  });
 
   const onShiftData = staff
     .map((person) => {
@@ -144,6 +135,38 @@ export default function ManagerStaffPage() {
       hoursThisWeek: Math.round(hoursThisWeek),
     };
   });
+
+  const allStaffColumns = [
+    { title: "Name", dataIndex: "name", key: "name" },
+    { title: "Role", dataIndex: "role", key: "role" },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "on-shift" ? "success" : "default"}>
+          {status === "on-shift" ? "On shift" : "Off shift"}
+        </Tag>
+      ),
+    },
+    { title: "Hours this week", dataIndex: "hoursThisWeek", key: "hoursThisWeek", render: (h: number) => `${h}h` },
+    {
+      title: "",
+      key: "action",
+      render: (_: unknown, record: { key: number }) => (
+        <button
+          onClick={() =>
+            setExpandedKeys((prev) =>
+              prev.includes(record.key) ? prev.filter((k) => k !== record.key) : [...prev, record.key]
+            )
+          }
+          className="text-brand-primary font-inter font-medium text-sm"
+        >
+          {expandedKeys.includes(record.key) ? "Hide history" : "View history →"}
+        </button>
+      ),
+    },
+  ];
 
   if (loading) {
     return (
@@ -187,6 +210,44 @@ export default function ManagerStaffPage() {
             pagination={false}
             className="font-inter"
             locale={{ emptyText: "No care workers have joined yet." }}
+            expandable={{
+              expandedRowKeys: expandedKeys,
+              onExpandedRowsChange: (keys) => setExpandedKeys(keys as number[]),
+              showExpandColumn: false,
+              expandedRowRender: (record) => {
+                const person = staff.find((p) => p.id === record.key);
+                if (!person) return null;
+
+                if (person.shifts.length === 0) {
+                  return <p className="text-sm text-brand-muted font-inter px-2">No shifts logged yet.</p>;
+                }
+
+                return (
+                  <Table
+                    size="small"
+                    pagination={false}
+                    columns={[
+                      { title: "Clocked in", dataIndex: "clockIn", key: "clockIn" },
+                      { title: "Clocked in at", dataIndex: "clockInLoc", key: "clockInLoc" },
+                      { title: "Clocked out", dataIndex: "clockOut", key: "clockOut" },
+                      { title: "Clocked out at", dataIndex: "clockOutLoc", key: "clockOutLoc" },
+                      { title: "Note", dataIndex: "note", key: "note" },
+                    ]}
+                    dataSource={person.shifts.map((s) => ({
+                      key: s.id,
+                      clockIn: new Date(Number(s.clockInTime)).toLocaleString(),
+                      clockInLoc: `${s.clockInLatitude.toFixed(4)}, ${s.clockInLongitude.toFixed(4)}`,
+                      clockOut: s.clockOutTime ? new Date(Number(s.clockOutTime)).toLocaleString() : "—",
+                      clockOutLoc:
+                        s.clockOutLatitude != null
+                          ? `${s.clockOutLatitude.toFixed(4)}, ${s.clockOutLongitude!.toFixed(4)}`
+                          : "—",
+                      note: s.clockInNote || "—",
+                    }))}
+                  />
+                );
+              },
+            }}
           />
         </div>
       </main>
