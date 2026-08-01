@@ -21,6 +21,13 @@ type ShiftRow = {
   note: string;
 };
 
+type ShiftType = {
+  id: number,
+  clockInTime: string,
+  clockOutTime: string,
+  clockInNote: string
+}
+
 export default function CareWorkerDashboard() {
   const { user } = useUser();
 
@@ -47,7 +54,7 @@ export default function CareWorkerDashboard() {
     });
   };
 
-  const formatShifts = (rawShifts: any[]): ShiftRow[] => {
+  const formatShifts = (rawShifts: ShiftType[]): ShiftRow[] => {
     return rawShifts.map((shift, index) => {
       const clockInDate = new Date(Number(shift.clockInTime));
       const clockOutDate = shift.clockOutTime ? new Date(Number(shift.clockOutTime)) : null;
@@ -139,7 +146,7 @@ export default function CareWorkerDashboard() {
     setPerimeterId(userData.perimeterId);
     setShifts(formatShifts(shiftsData));
 
-    const openShift = shiftsData.find((s) => !s.clockOutTime);
+    const openShift = shiftsData.find((s: ShiftType) => !s.clockOutTime);
     setIsClockedIn(!!openShift);
     setOpenShiftId(openShift ? openShift.id : null);
 
