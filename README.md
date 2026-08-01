@@ -4,13 +4,15 @@
 
 Care workers clock in from verified on-site locations. Managers see who's on shift, where, and for how long, all in real time.
 
+live demo : https://clock-it-eta.vercel.app/
+
 ---
 
 ## Features
 
 - **Perimeter-checked clock-in** : Staff can only clock in from inside a manager-defined radius around each site (Haversine distance check via browser GPS).
 - **Live staff overview** : See who's clocked in right now, where, and since when.
-- **Manager analytics** — Average hours per day, clock-ins per day, and total hours per staff member over the last 7 days (Chart.js).
+- **Manager analytics** : Average hours per day, clock-ins per day, and total hours per staff member over the last 7 days (Chart.js).
 - **Organization & invite codes** : Managers create an org with an auto-generated invite code; care workers join with that code.
 - **Auth0 authentication** : Social login / SSO with role-based onboarding and dashboard routing.
 - **Shift notes** : Optional notes attached to clock-in and clock-out events.
