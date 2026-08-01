@@ -103,39 +103,17 @@ export const shiftResolver = {
             })
         },
 
-        checkPerimeter: async(_parent: unknown, args: ClockInArgs) => {
-            
-            const openShift = await prisma.shift.findFirst({
-                where: {
-                    userId: args.userId,
-                    clockOutTime: null
-                }
+        checkPerimeter: async (_parent: unknown, args: { perimeterId: number; latitude: number; longitude: number }) => {
+            const perimeter = await prisma.perimeter.findUnique({
+                where: { id: args.perimeterId },
             });
 
-            if(openShift){
-                throw new GraphQLError("You are already clocked in!");
-            }
-
-            const perimeter = await prisma.perimeter.findUnique({
-                where: {
-                    id: args.perimeterId
-                }
-            })
-
-            if(!perimeter){
+            if (!perimeter) {
                 throw new GraphQLError("Perimeter not found.");
             }
 
-            const distance = getDistanceKm(
-                args.clockInLatitude,
-                args.clockInLongitude,
-                perimeter.latitude,
-                perimeter.longitude
-            );
-
-            if(distance>perimeter.radius){
-                throw new GraphQLError("You are outside the allowed perimeter to clock in.")
-            }
-        }
+            const distance = getDistanceKm(args.latitude, args.longitude, perimeter.latitude, perimeter.longitude);
+            return distance <= perimeter.radius;
+        },
     }
 }

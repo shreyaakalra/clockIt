@@ -21,7 +21,7 @@ export const shiftTypeDefs = `
     type Mutation{
         clockIn(userId: Int!, perimeterId: Int!, clockInLatitude: Float!, clockInLongitude: Float!, clockInNote: String): Shift
 
-        checkPerimeter(userId: Int!, perimeterId: Int!, clockInLatitude: Float!, clockInLongitude: Float!, clockInNote: String): Boolean
+        checkPerimeter(perimeterId: Int!, latitude: Float!, longitude: Float!): Boolean
 
         clockOut(shiftId: Int!, clockOutLatitude: Float!, clockOutLongitude: Float!, clockOutNote: String): Shift
     }

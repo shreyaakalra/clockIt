@@ -59,3 +59,7 @@ export type GetUserInformationByEmailArgs = {
 export type OrganizationByIdArgs = {
     id: number
 }
+
+export type UsersByOrganizationArgs = {
+    organizationId: number
+}

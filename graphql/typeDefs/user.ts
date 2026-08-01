@@ -20,6 +20,8 @@ export const userTypeDefs = `
     type Query{
         getUserInformation(id: Int!): User
         getUserInformationByEmail(email: String!): User
+        usersByOrganization(organizationId: Int!): [User]
+
     }
 
     type Mutation{

@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, Input } from "antd";
 import { useUser } from "@auth0/nextjs-auth0";
 import { useRouter } from "next/navigation";
+import Header from "../Header";
 
 const mockInviteCode = "RIVER-7F2K";
 
 type PerimeterType = {
     id: number,
     name: string,
-    lat: number,
-    lng: number,
+    latitude: number,
+    longitude: number,
     radius: number
 }
 
@@ -48,11 +49,89 @@ export default function ManagerSettingsPage(){
   const [copied, setCopied] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [perimeters, setPerimeters] = useState<PerimeterType[]>([])
+  const [name, setName] = useState("")
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    async function gettingOrgInfo(){
+      if(!user) return;
+
+      const userResponse = await fetch('/api/graphql', {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+              query: `
+                  query($email: String!){
+                      getUserInformationByEmail(email: $email){
+                          organizationId
+                      }
+                  }
+              `,
+              variables: {email: user.email}
+          })
+      });
+
+      const userResult = await userResponse.json();
+
+      if(userResult.errors){
+          console.log(userResult.errors);
+          return;
+      }
+
+      const userDetails = userResult.data.getUserInformationByEmail;
+
+      if(!userDetails){
+          console.log("couldn't find your user record.")
+          return;
+      } 
+
+      const orgResponse = await fetch('/api/graphql', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          query: `
+            query($id: Int!){
+              organizationById(id: $id){
+                name
+                inviteCode
+                perimeters{
+                  id
+                  name
+                  latitude
+                  longitude
+                  radius
+                }
+              }
+            }
+          `,
+          variables: {id: userDetails.organizationId}
+        })
+      })
+
+      const orgResult = await orgResponse.json();
+
+      if(orgResult.errors){
+        console.log(orgResult.errors);
+        return;
+      }
+
+      const orgDetails = orgResult.data.organizationById;
+
+      setName(orgDetails.name);
+      setInviteCode(orgDetails.inviteCode);
+      setPerimeters(orgDetails.perimeters);
+      setLoading(false);
+      console.log(orgDetails.perimeters);
+    }
+
+    gettingOrgInfo();
+  }, [user])
 
   
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(mockInviteCode);
+    navigator.clipboard.writeText(inviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -144,49 +223,29 @@ export default function ManagerSettingsPage(){
   }
 
   return (
+
     <div className="min-h-screen bg-brand-bg">
 
-      <header className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto gap-2">
-
-            <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center bg-brand-primary">
-                <span className="w-3 h-3 rounded-full bg-white block" />
-                </span>
-                <span className="font-jost font-semibold text-xl tracking-tight text-brand-heading">
-                clock it
-                </span>
-            </div>
-
-            <nav className="flex items-center sm:gap-16 md:gap-16 gap-2 font-inter text-sm">
-                <a href="/manager/dashboard" className="text-brand-muted underline underline-offset-4">Dashboard</a>
-                <a href="/manager/staff" className="text-brand-muted underline underline-offset-4">Staff</a>
-                <a href="/manager/settings" className="text-brand-heading font-medium underline underline-offset-4">Settings</a>
-            </nav>
-
-            <div>
-                <a href="/auth/logout" className="text-sm text-brand-muted">
-                    <button
-                    className="border border-brand-heading h-10 w-24 md:mr-8 rounded font-inter font-semibold bg-brand-primary text-amber-50 hover:bg-brand-bg hover:text-brand-primary hover:border-brand-primary "
-                >
-                        Sign out
-                    </button>
-                </a>
-            </div>
-
-      </header>
+      {loading ? (
+        <div>
+          Loading
+        </div>
+      ):(
+        <div>
+          <Header />
 
       <main className="max-w-6xl mx-auto px-6 pb-16 flex flex-col gap-6 mt-10">
         <div className="bg-white rounded-2xl border border-brand-border p-6">
-            <span className="font-bold text-2xl text-brand-primary">Riverside House</span>
+            <span className="font-bold text-2xl text-brand-primary">{name}</span>
             <h2 className="font-jost text-base font-semibold text-brand-heading mb-2 mt-4">
                 Invite code
             </h2>
           <p className="text-sm text-brand-muted font-inter mb-5">
-            Share this with your team so they can join Riverside House.
+            Share this with your team so they can join {name}.
           </p>
           <div className="flex items-center gap-3">
             <span className="font-mono text-lg tracking-wider text-brand-heading bg-brand-pale rounded-lg px-4 py-2">
-              {mockInviteCode}
+              {inviteCode}
             </span>
             <Button onClick={handleCopy} className="font-inter">
               {copied ? "Copied" : "Copy"}
@@ -200,7 +259,7 @@ export default function ManagerSettingsPage(){
           </h2>
 
           {/*<div className="flex flex-col gap-3 mb-6">
-            {mockPerimeters.map((p) => (
+            {perimeters.map((p) => (
               <div
                 key={p.id}
                 className="flex items-center justify-between border border-brand-border rounded-xl px-4 py-3"
@@ -208,7 +267,7 @@ export default function ManagerSettingsPage(){
                 <div>
                   <p className="font-inter font-medium text-brand-text text-sm">{p.name}</p>
                   <p className="text-xs text-brand-muted font-inter">
-                    {p.lat}, {p.lng} &middot; {p.radius} km radius
+                    {p.latitude}, {p.longitude} &middot; {p.radius} km radius
                   </p>
                 </div>
                 <button className="text-xs text-brand-muted underline underline-offset-4">
@@ -309,6 +368,11 @@ export default function ManagerSettingsPage(){
 
         </div>
       </main>
+        </div>
+      )}
+
+
+      
     </div>
   );
 }

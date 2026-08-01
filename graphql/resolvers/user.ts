@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { AddNewUserArgs, GetUserInformationArgs, GetUserInformationByEmailArgs } from "../types";
+import { AddNewUserArgs, GetUserInformationArgs, GetUserInformationByEmailArgs, UsersByOrganizationArgs } from "../types";
 import { GraphQLError } from "graphql";
 
 
@@ -17,9 +17,23 @@ export const userResolver = {
             return await prisma.user.findUnique({
                 where: {
                     email: args.email
+                },
+                include: {
+                    shifts: true
                 }
             })
-        }
+        },
+        usersByOrganization: async (_parent: unknown, args: UsersByOrganizationArgs) => {
+            return prisma.user.findMany({
+                where: { 
+                    organizationId: args.organizationId, 
+                    role: "CARE_WORKER" 
+                },
+                include: { 
+                    shifts: true 
+                },
+            });
+        },
     },
 
     Mutation: {

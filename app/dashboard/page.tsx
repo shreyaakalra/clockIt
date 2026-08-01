@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useUser } from "@auth0/nextjs-auth0";
 import { Button, Table, Tag } from "antd";
@@ -12,202 +12,239 @@ const columns = [
   { title: "Note", dataIndex: "note", key: "note", ellipsis: true },
 ];
 
-export default function CareWorkerDashboard() {
-  
-  const [isClockedIn, setIsClockedIn] = useState(false);
-  const {user} = useUser();
+type ShiftRow = {
+  key: number;
+  date: string;
+  clockIn: string;
+  clockOut: string;
+  duration: string;
+  note: string;
+};
 
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
+export default function CareWorkerDashboard() {
+  const { user } = useUser();
+
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [openShiftId, setOpenShiftId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [perimeterId, setPerimeterId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [errorExists, setErrorExists] = useState(false);
-  const [shifts, setShifts] = useState([]);
-
-  const mockShifts = shifts;
+  const [shifts, setShifts] = useState<ShiftRow[]>([]);
 
   const getGeoLocation = (): Promise<{ lat: number; lng: number }> => {
     return new Promise((resolve, reject) => {
-      if(!navigator.geolocation){
-        console.log('Cannot GeoLocate on this browser.')
-        reject("No geolocation");
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation not supported by this browser."));
         return;
       }
-
       navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLatitude(position.coords.latitude);
-            setLongitude(position.coords.longitude);
-            resolve({ lat: position.coords.latitude, lng: position.coords.longitude }); 
-          },
-          (error) => {
-              console.log("Couldn't get Location", error.message);
-              reject(error);
-          }
-      )
+        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
+        (err) => reject(err)
+      );
     });
-  }
+  };
 
-  const addShift = async() => {
+  const formatShifts = (rawShifts: any[]): ShiftRow[] => {
+    return rawShifts.map((shift, index) => {
+      const clockInDate = new Date(Number(shift.clockInTime));
+      const clockOutDate = shift.clockOutTime ? new Date(Number(shift.clockOutTime)) : null;
 
-    if(!user) return;
+      let duration = "In progress";
+      if (clockOutDate) {
+        const mins = Math.round((clockOutDate.getTime() - clockInDate.getTime()) / 60000);
+        duration = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+      }
 
-    const userResponse = await fetch('/api/graphql', {
+      return {
+        key: shift.id ?? index,
+        date: clockInDate.toLocaleDateString(),
+        clockIn: clockInDate.toLocaleTimeString(),
+        clockOut: clockOutDate ? clockOutDate.toLocaleTimeString() : "—",
+        duration,
+        note: shift.clockInNote || "—",
+      };
+    });
+  };
+
+  // Checks perimeter status only — used on load
+  const runPerimeterCheck = async (targetPerimeterId: number) => {
+    try {
+      const coords = await getGeoLocation();
+      const checkResponse = await fetch("/api/graphql", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: `
-            query($email: String!){
-              getUserInformationByEmail(email: $email){
-                id
-                name
-                role
-                organizationId
-                perimeterId
-                shifts {
-                  id
-                  clockInTime
-                  clockOutTime
-                  clockInNote
-                }
-              }
+            query($perimeterId: Int!, $latitude: Float!, $longitude: Float!) {
+              checkPerimeter(perimeterId: $perimeterId, latitude: $latitude, longitude: $longitude)
             }
           `,
-          variables: {email: user.email}
-        })
+          variables: { perimeterId: targetPerimeterId, latitude: coords.lat, longitude: coords.lng },
+        }),
       });
+      const checkResult = await checkResponse.json();
 
-      const userResult = await userResponse.json();
-
-      if(userResult.errors){
-        console.log(userResult.errors);
-        return;
+      if (checkResult.errors || checkResult.data.checkPerimeter === false) {
+        setError("You're outside the allowed perimeter to clock in.");
+        setErrorExists(true);
+      } else {
+        setError("");
+        setErrorExists(false);
       }
+    } catch {
+      setError("Couldn't get your location.");
+      setErrorExists(true);
+    }
+  };
+
+  // Single source of truth: re-fetch user + shift state from the server
+  const loadUserAndShifts = async () => {
+    if (!user) return;
+
+    const userResponse = await fetch("/api/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `
+          query($email: String!) {
+            getUserInformationByEmail(email: $email) {
+              id
+              perimeterId
+              shifts {
+                id
+                clockInTime
+                clockOutTime
+                clockInNote
+              }
+            }
+          }
+        `,
+        variables: { email: user.email },
+      }),
+    });
+
+    const userResult = await userResponse.json();
+    if (userResult.errors) {
+      console.log(userResult.errors);
+      return;
+    }
 
     const userData = userResult.data.getUserInformationByEmail;
+    const shiftsData = userData.shifts ?? [];
 
-    const shiftResponse = await fetch('/api/graphql', {
-        method: "POST",
-        headers: {"Content-Type" : "application/json"},
-        body: JSON.stringify({
-          query: `
-            mutation($userId: Int!, $perimeterId: Int!, $clockInLatitude: Float!, $clockInLongitude: Float!, $clockInNote: String!){
-              clockIn(userId: $userId, perimeterId: $perimeterId, clockInLatitude: $clockInLatitude, clockInLongitude: $clockInLongitude, clockInNote: $clockInNote){
-                clockInTime
-              }
-            }
-          `,
-          variables: {
-            userId: userData.id,
-            perimeterId: userData.perimeterId,
-            clockInLatitude: latitude,
-            clockInLongitude: longitude,
-            clockInNote: note
-          }
-        })
-      });
+    setUserId(userData.id);
+    setPerimeterId(userData.perimeterId);
+    setShifts(formatShifts(shiftsData));
 
-      const shiftResult = await shiftResponse.json();
-      setIsClockedIn(true);
+    const openShift = shiftsData.find((s) => !s.clockOutTime);
+    setIsClockedIn(!!openShift);
+    setOpenShiftId(openShift ? openShift.id : null);
 
-      const formattedShifts = userData.shifts.map((shift, index) => ({
-        key: shift.id || index, 
-        date: new Date(Number(shift.clockInTime)).toLocaleDateString(),
-        clockIn: new Date(Number(shift.clockInTime)).toLocaleTimeString(),
-        clockOut: shift.clockOutTime ? new Date(Number(shift.clockOutTime)).toLocaleTimeString() : "-",
-        duration: "...", 
-        note: shift.clockInNote
-      }));
-
-      setShifts(formattedShifts);
-
-  }
+    // Only worth checking the perimeter proactively if not already clocked in
+    if (!openShift && userData.perimeterId) {
+      await runPerimeterCheck(userData.perimeterId);
+    } else {
+      setError("");
+      setErrorExists(false);
+    }
+  };
 
   useEffect(() => {
+    if(!user) return;
+    (async () => {
+      await loadUserAndShifts();
+      setLoading(false);
+    })();
+  }, [user]);
 
-    async function checkingOnSite(){
+  const handleClockAction = async () => {
+    if (!user || !userId) return;
 
-      if(!user) return;
-      
-      const userResponse = await fetch('/api/graphql', {
+    let coords;
+    try {
+      coords = await getGeoLocation();
+    } catch {
+      setError("Couldn't get your location.");
+      setErrorExists(true);
+      return;
+    }
+
+    if (!isClockedIn) {
+      const response = await fetch("/api/graphql", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: `
-            query($email: String!){
-              getUserInformationByEmail(email: $email){
+            mutation($userId: Int!, $perimeterId: Int!, $clockInLatitude: Float!, $clockInLongitude: Float!, $clockInNote: String) {
+              clockIn(userId: $userId, perimeterId: $perimeterId, clockInLatitude: $clockInLatitude, clockInLongitude: $clockInLongitude, clockInNote: $clockInNote) {
                 id
-                name
-                role
-                organizationId
-                perimeterId
-                shifts {
-                  id
-                  clockInTime
-                  clockOutTime
-                  clockInNote
-                }
               }
             }
           `,
-          variables: {email: user.email}
-        })
-      });
-
-      const userResult = await userResponse.json();
-
-      if(userResult.errors){
-        console.log(userResult.errors);
-        return;
-      }
-
-      const userData = userResult.data.getUserInformationByEmail;
-
-      const coords = await getGeoLocation();
-
-      const shiftResponse = await fetch('/api/graphql', {
-        method: "POST",
-        headers: {"Content-Type" : "application/json"},
-        body: JSON.stringify({
-          query: `
-            mutation($userId: Int!, $perimeterId: Int!, $clockInLatitude: Float!, $clockInLongitude: Float!, $clockInNote: String!){
-              checkPerimeter(userId: $userId, perimeterId: $perimeterId, clockInLatitude: $clockInLatitude, clockInLongitude: $clockInLongitude, clockInNote: $clockInNote)
-            }
-          `,
           variables: {
-            userId: userData.id,
-            perimeterId: userData.perimeterId,
+            userId,
+            perimeterId,
             clockInLatitude: coords.lat,
             clockInLongitude: coords.lng,
-            clockInNote: note
-          }
-        })
+            clockInNote: note || null,
+          },
+        }),
       });
 
-      const shiftResult = await shiftResponse.json();
-
-      if(shiftResult.errors){
-        console.log(shiftResult.errors);
-        setError(shiftResult.errors[0]?.message);
+      const result = await response.json();
+      if (result.errors) {
+        setError(result.errors[0]?.message ?? "Couldn't clock in.");
         setErrorExists(true);
         return;
       }
+    } else {
+      if (!openShiftId) return;
 
-      setError("");
-      setErrorExists(false);
+      const response = await fetch("/api/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+            mutation($shiftId: Int!, $clockOutLatitude: Float!, $clockOutLongitude: Float!, $clockOutNote: String) {
+              clockOut(shiftId: $shiftId, clockOutLatitude: $clockOutLatitude, clockOutLongitude: $clockOutLongitude, clockOutNote: $clockOutNote) {
+                id
+              }
+            }
+          `,
+          variables: {
+            shiftId: openShiftId,
+            clockOutLatitude: coords.lat,
+            clockOutLongitude: coords.lng,
+            clockOutNote: note || null,
+          },
+        }),
+      });
 
-      const shiftData = shiftResult.data.clockIn;
-
-      return true;
+      const result = await response.json();
+      if (result.errors) {
+        setError(result.errors[0]?.message ?? "Couldn't clock out.");
+        setErrorExists(true);
+        return;
+      }
     }
 
-    checkingOnSite();
+    setNote("");
+    await loadUserAndShifts();
+  };
 
-  }, [user])
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
+        <p className="font-inter text-brand-muted">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-bg">
-
       <header className="flex items-center justify-between px-8 py-5 max-w-5xl mx-auto">
         <div className="flex items-center gap-2">
           <span className="w-8 h-8 rounded-full flex items-center justify-center bg-brand-primary">
@@ -218,7 +255,7 @@ export default function CareWorkerDashboard() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-brand-text font-inter">Amara O.</span>
+          <span className="text-sm text-brand-text font-inter">{user?.name ?? ""}</span>
           <a href="/auth/logout" className="text-sm text-brand-muted underline underline-offset-4">
             Sign out
           </a>
@@ -226,33 +263,24 @@ export default function CareWorkerDashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 pb-16">
-        
         <div className="bg-white rounded-2xl border border-brand-border p-8 mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-brand-muted font-semibold mb-2">
-                Riverside House
-              </p>
               <h1 className="font-jost text-2xl md:text-3xl font-semibold text-brand-heading">
                 {isClockedIn ? "You're on shift" : "You're not clocked in"}
               </h1>
-              {isClockedIn && (
-                <p className="text-sm text-brand-text mt-1">Since 8:02 AM &middot; 4h 12m so far</p>
-              )}
+              {errorExists && <p className="text-sm text-red-500 mt-1">{error}</p>}
             </div>
-            <Tag
-              className="font-inter"
-              color={!errorExists ? "success" : "default"}
-            >
+            <Tag className="font-inter" color={!errorExists ? "success" : "default"}>
               {!errorExists ? "Within perimeter" : "Not on site"}
             </Tag>
           </div>
 
           <textarea
-            placeholder={isClockedIn ? "Add a note before you clock out " : "Add a note before you clock in "}
+            placeholder={isClockedIn ? "Add a note before you clock out" : "Add a note before you clock in"}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="border-2 h-20 w-100 mb-5 items-center p-5 rounded-2xl font-inter "
+            className="border-2 h-20 w-full mb-5 p-3 rounded-2xl font-inter"
           />
 
           <Button
@@ -260,9 +288,9 @@ export default function CareWorkerDashboard() {
             size="large"
             block
             danger={isClockedIn}
-            className={`font-inter font-medium ${!isClockedIn ? "bg-brand-primary border-brand-primary" : ""} `}
-            disabled={errorExists}    
-            onClick={addShift}      
+            className={`font-inter font-medium ${!isClockedIn ? "bg-brand-primary border-brand-primary" : ""}`}
+            disabled={!isClockedIn && errorExists}
+            onClick={handleClockAction}
           >
             {isClockedIn ? "Clock out" : "Clock in"}
           </Button>
@@ -272,12 +300,7 @@ export default function CareWorkerDashboard() {
           <h2 className="font-jost text-lg font-semibold text-brand-heading mb-5">
             Your recent shifts
           </h2>
-          <Table
-            columns={columns}
-            dataSource={mockShifts}
-            pagination={false}
-            className="font-inter"
-          />
+          <Table columns={columns} dataSource={shifts} pagination={false} className="font-inter" />
         </div>
       </main>
     </div>
