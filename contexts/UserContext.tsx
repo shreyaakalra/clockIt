@@ -13,23 +13,22 @@ type AppUser = {
 
 type UserContextValue = {
   appUser: AppUser | null;
-  loading: boolean;
 };
 
 const UserContext = createContext<UserContextValue>({
   appUser: null,
-  loading: true,
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
+  
   const { user } = useUser();
   const [appUser, setAppUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
 
-    (async () => {
+    async function userInfo(){
+      if (!user) return;
+
       const response = await fetch("/api/graphql", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,15 +49,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       });
 
       const result = await response.json();
+
       if (!result.errors) {
         setAppUser(result.data.getUserInformationByEmail);
       }
-      setLoading(false);
-    })();
+
+    };
+
+    userInfo();
+
   }, [user]);
 
   return (
-    <UserContext.Provider value={{ appUser, loading }}>
+    <UserContext.Provider value={{ appUser }}>
       {children}
     </UserContext.Provider>
   );

@@ -27,6 +27,7 @@ export const shiftResolver = {
         },
 
         checkPerimeter: async (_parent: unknown, args: { perimeterId: number; latitude: number; longitude: number }) => {
+
             const perimeter = await prisma.perimeter.findUnique({
                 where: { id: args.perimeterId },
             });
@@ -36,6 +37,7 @@ export const shiftResolver = {
             }
 
             const distance = getDistanceKm(args.latitude, args.longitude, perimeter.latitude, perimeter.longitude);
+            
             return distance <= perimeter.radius;
         },
     },

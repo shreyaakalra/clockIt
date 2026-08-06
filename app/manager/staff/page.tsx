@@ -37,29 +37,8 @@ export default function ManagerStaffPage() {
     if (!appUser) return;
 
     (async () => {
-      const orgResponse = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            query($email: String!) {
-              getUserInformationByEmail(email: $email) {
-                organizationId
-              }
-            }
-          `,
-          variables: { email: appUser.email },
-        }),
-      });
-
-      const orgResult = await orgResponse.json();
-      if (orgResult.errors) {
-        console.log(orgResult.errors);
-        setLoading(false);
-        return;
-      }
-
-      const organizationId = orgResult.data.getUserInformationByEmail.organizationId;
+      
+      const organizationId = appUser.organizationId;
 
       const staffResponse = await fetch("/api/graphql", {
         method: "POST",
@@ -87,7 +66,9 @@ export default function ManagerStaffPage() {
           variables: { organizationId },
         }),
       });
+
       const staffResult = await staffResponse.json();
+
       if (staffResult.errors) {
         console.log(staffResult.errors);
         setLoading(false);
@@ -107,7 +88,9 @@ export default function ManagerStaffPage() {
   const onShiftData = staff
     .map((person) => {
       const openShift = person.shifts.find((s) => !s.clockOutTime);
+
       if (!openShift) return null;
+      
       return {
         key: person.id,
         name: person.name,

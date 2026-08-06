@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 import prisma from "./prisma";
 
 export const auth0 = new Auth0Client({
+
   async onCallback(error, context, session) {
+
     if (error || !session) {
       return NextResponse.redirect(new URL("/", process.env.APP_BASE_URL));
     }
@@ -19,4 +21,5 @@ export const auth0 = new Auth0Client({
     const destination = user.role === "MANAGER" ? "/manager/dashboard" : "/dashboard";
     return NextResponse.redirect(new URL(destination, process.env.APP_BASE_URL));
   },
+  
 });

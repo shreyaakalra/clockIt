@@ -1,9 +1,8 @@
 import { auth0 } from "@/lib/auth0";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { UserProvider } from "@/contexts/UserContext";
 
-export default async function ManagerLayout({ children }: { children: React.ReactNode }) {
+export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
   
   const session = await auth0.getSession();
 
@@ -15,9 +14,9 @@ export default async function ManagerLayout({ children }: { children: React.Reac
     where: { authId: session.user.sub },
   });
 
-  if (!user || user.role !== "MANAGER") {
-    redirect("/dashboard");
+  if(user){
+    redirect(user.role === "MANAGER" ? "/manager/settings" : "/dashboard")
   }
 
-  return <UserProvider>{children}</UserProvider>;
+  return <>{children}</>;
 }

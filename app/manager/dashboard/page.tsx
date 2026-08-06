@@ -35,31 +35,8 @@ export default function ManagerDashboard() {
     if (!appUser) return;
 
     const getShifts = async () => {
-      const orgResponse = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            query($email: String!) {
-              getUserInformationByEmail(email: $email) {
-                organizationId
-              }
-            }
-          `,
-          variables: { email: appUser.email },
-        }),
-      });
 
-      const orgResult = await orgResponse.json();
-
-      if (orgResult.errors) {
-        console.log(orgResult.errors);
-        setLoading(false);
-        return;
-      }
-
-      const organizationId =
-        orgResult.data.getUserInformationByEmail.organizationId;
+      const organizationId = appUser.organizationId
 
       const staffResponse = await fetch("/api/graphql", {
         method: "POST",
@@ -116,13 +93,17 @@ export default function ManagerDashboard() {
 
   const staffHours = staff
     .map((person) => {
+
       const hours = person.shifts.reduce((total, shift) => {
+
         const clockIn = Number(shift.clockInTime);
+
         if (clockIn < timeRange.oneWeekAgo) return total;
         const clockOut = shift.clockOutTime
           ? Number(shift.clockOutTime)
           : timeRange.now;
         return total + (clockOut - clockIn) / (60 * 60 * 1000);
+
       }, 0);
 
       return { name: person.name, hours: Math.round(hours) };
@@ -141,7 +122,9 @@ export default function ManagerDashboard() {
   const onShiftNow = staff
     .map((person) => {
       const openShift = person.shifts.find((s) => !s.clockOutTime);
+
       if (!openShift) return null;
+
       return {
         name: person.name,
         since: new Date(Number(openShift.clockInTime)).toLocaleTimeString(),
@@ -163,8 +146,6 @@ export default function ManagerDashboard() {
     return { day: DAY_LABELS[new Date(dayStart).getDay()], count };
   });
 
-  const maxStaffHours = Math.max(1, ...staffHours.map((s) => s.hours));
-
   if (loading) {
     return (
       <div className="min-h-screen bg-brand-bg flex items-center justify-center">
@@ -178,26 +159,38 @@ export default function ManagerDashboard() {
       <Header />
 
       <main className="max-w-6xl mx-auto px-6 pb-16">
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
           <StatCard
             label="Avg. hours / day"
             value={avgHoursLabel}
             sublabel="last 7 days"
           />
+
           <StatCard
             label="Clocked in now"
             value={String(onShiftNow.length)}
             sublabel={`of ${staff.length} staff`}
           />
-          <StatCard label="Clock-ins today" value={String(clockInsToday)} />
+
+          <StatCard 
+            label="Clock-ins today" 
+            value={String(clockInsToday)} 
+          />
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
           <div className="bg-white rounded-2xl border border-brand-border p-6">
+
             <h2 className="font-jost text-base font-semibold text-brand-heading mb-6">
               Clock-ins per day
             </h2>
+
             <div className="h-40">
+              
               <Bar
                 data={{
                   labels: weeklyClockIns.map((d) => d.day),

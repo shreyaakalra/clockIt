@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button, Form, Input } from "antd";
-import { useUser } from "@auth0/nextjs-auth0";
 import { useRouter } from "next/navigation";
 import Header from "../Header";
 import { useAppUser } from "@/contexts/UserContext";
@@ -48,34 +47,7 @@ export default function ManagerSettingsPage(){
     async function gettingOrgInfo(){
       if(!appUser) return;
 
-      const userResponse = await fetch('/api/graphql', {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-              query: `
-                  query($email: String!){
-                      getUserInformationByEmail(email: $email){
-                          organizationId
-                      }
-                  }
-              `,
-              variables: {email: appUser.email}
-          })
-      });
-
-      const userResult = await userResponse.json();
-
-      if(userResult.errors){
-          console.log(userResult.errors);
-          return;
-      }
-
-      const userDetails = userResult.data.getUserInformationByEmail;
-
-      if(!userDetails){
-          console.log("couldn't find your user record.")
-          return;
-      } 
+      const orgId = appUser.organizationId
 
       const orgResponse = await fetch('/api/graphql', {
         method: "POST",
@@ -96,7 +68,7 @@ export default function ManagerSettingsPage(){
               }
             }
           `,
-          variables: {id: userDetails.organizationId}
+          variables: {id: orgId}
         })
       })
 
@@ -116,15 +88,15 @@ export default function ManagerSettingsPage(){
     }
 
     gettingOrgInfo();
-  }, [appUser])
 
-  
+  }, [appUser]) 
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+
 
   const getGeoLocation = () => {
     if(!navigator.geolocation){
@@ -217,6 +189,7 @@ export default function ManagerSettingsPage(){
         <div className="bg-white rounded-2xl border border-brand-border p-6">
       
           <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+
             <Form.Item>
                 <p className="font-inter font-black text-brand-primary text-2xl mb-2">
                     Add a new perimeter
