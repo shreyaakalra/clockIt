@@ -354,18 +354,7 @@ export default function CareWorkerDashboard(){
             className="border-2 h-20 w-full mb-5 p-3 rounded-2xl font-inter"
           />
 
-          <Button
-            type="primary"
-            size="large"
-            block
-            danger={isClockedIn}
-            className={`font-inter font-medium ${!isClockedIn ? "bg-brand-primary border-brand-primary" : ""}`}
-            disabled={!isClockedIn && errorExists}
-            onClick={handleClockAction}
-          >
-            {isClockedIn ? "Clock out" : "Clock in"}
-
-          </Button>
+          
 
         </div>
 
